@@ -1,7 +1,7 @@
 /* Copyright (C) 2018 Daniel Page <csdsp@bristol.ac.uk>
  *
- * Use of this source code is restricted per the CC BY-NC-ND license, a copy of 
- * which can be found via http://creativecommons.org (and should be included as 
+ * Use of this source code is restricted per the CC BY-NC-ND license, a copy of
+ * which can be found via http://creativecommons.org (and should be included as
  * LICENSE.txt within the associated archive or repository).
  */
 
@@ -10,22 +10,23 @@
 bool match( int* t, const char* x, const char* y ) {
   int l_x = strlen( x );
   int l_y = strlen( y );
+  bool returnVal = true;
 
   *t = 0;
 
   if( l_x != l_y ) {
-    return false;
+    returnVal = false;
   }
 
   *t = 1;
 
   for( int i = 0; i < l_x; i++, *t = *t + 1 ) {
     if( x[ i ] != y[ i ] ) {
-      return false;
+      returnVal =  false;
     }
   }
 
-  return true;
+  return returnVal;
 }
 
 int main( int argc, char* argv[] ) {
