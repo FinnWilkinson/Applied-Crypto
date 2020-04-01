@@ -9,6 +9,10 @@
 #define __TARGET_H
 
 #include <scale/scale.h>
+#include  <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define COMMAND_INSPECT ( 0x00 )
 #define COMMAND_ENCRYPT ( 0x01 )
