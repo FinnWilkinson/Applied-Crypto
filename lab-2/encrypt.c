@@ -218,24 +218,21 @@ void aes_enc_rnd_mix(aes_gf28_t* s) {
 }
 
 void aes_enc(uint8_t* c, uint8_t* m, uint8_t* k) {
-  aes_gf28_t* s = malloc(16 * sizeof(aes_gf28_t));
-  memcpy(s, m, 16*sizeof(aes_gf28_t));
+  memcpy(c, m, 16*sizeof(aes_gf28_t));
   aes_gf28_t rc[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
   //1 initial round
-  aes_enc_rnd_key(s, k);
+  aes_enc_rnd_key(c, k);
   //Nr-1 iterated rounds with Nr = 10 for AES-128
   for (int i = 1; i < 10; i++) {
-    aes_enc_rnd_sub(s);
-    aes_enc_rnd_row(s);
-    aes_enc_rnd_mix(s);
+    aes_enc_rnd_sub(c);
+    aes_enc_rnd_row(c);
+    aes_enc_rnd_mix(c);
     aes_enc_exp_step(k, rc[i-1]);
-    aes_enc_rnd_key(s, k);
+    aes_enc_rnd_key(c, k);
   }
   //1 final round
-  aes_enc_rnd_sub(s);
-  aes_enc_rnd_row(s);
+  aes_enc_rnd_sub(c);
+  aes_enc_rnd_row(c);
   aes_enc_exp_step(k, rc[9]);
-  aes_enc_rnd_key(s, k);
-
-  memcpy(c, s, 16*sizeof(aes_gf28_t));
+  aes_enc_rnd_key(c, k);
 }

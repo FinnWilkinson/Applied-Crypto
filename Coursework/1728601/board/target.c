@@ -86,7 +86,23 @@ void octetstr_wr( const uint8_t* x, int n_x ) {
   return;
 }
 
-//multiply two aes_gf28 together bitwise under field F(2^8)
+//multiplies a by indeterminant x under modulo p(x)
+aes_gf28_t xtime( aes_gf28_t  a) { 
+  //a = <1,0,0,0,1,1,1,0> = 1 + x4 + x5 + x6 = 1+16+32+64 = 113
+  //a*x = x + x5 + x6 + x7 = <0,1,0,0,0,1,1,1> = 2+32+64+128 = 226
+  //so is a logical shift left but need to deal with overflow
+  //a*x*x = x2 + x6 + x7 + x8 = x2 + x6 + x7 + (x4 + x3 + x + 1) = 1 + x + x2 + x3 + x4 + x6 + x7 = 223
+  //                            <0,0,1,0,0,0,1,1> xor <1,1,0,1,1,0,0,0>
+  // x8 = x4 + x3 + x + 1
+  //if x8th bit == 1, LSR xor 1B
+
+  if((a & 0x80) == 0x80){
+    return (0x1B ^ (a << 1));
+  }
+  else return (a << 1);
+}
+
+//multiply two aes_gf28 together under field F(2^8)
 aes_gf28_t aes_gf28_mul( aes_gf28_t a, aes_gf28_t b) {
   aes_gf28_t t = 0;
   for (int i = 7; i >= 0; i--) {
