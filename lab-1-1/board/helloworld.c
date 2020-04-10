@@ -28,7 +28,7 @@ int main( int argc, char* argv[] ) {
 
   char x[] = "hello world";
   uint8_t readIn[8] = {0,0,0,0,0,0,0,0};
-  uint8_t* reversed;
+  uint8_t reversed[8] = {0,0,0,0,0,0,0,0};
 
   while( true ) {
     // read  the GPI     pin, and hence switch : t   <- GPI
@@ -52,29 +52,32 @@ int main( int argc, char* argv[] ) {
       scale_uart_wr( SCALE_UART_MODE_BLOCKING, x[ i ] );
     }*/
 
-    octetstr_rd(readIn, 8);
-    //reverse(readIn, reversed, size);
-    //octetstr_wr(readIn, 8);
+    int size = octetstr_rd(readIn, 8);
+    reverse(readIn, reversed, size);
+    octetstr_wr(reversed, 8);
   }
 
   return 0;
 }
 
 int octetstr_rd( uint8_t* r, int  n_r){
-  r[ 0 ] = scale_uart_rd( SCALE_UART_MODE_BLOCKING);
-  scale_uart_wr( SCALE_UART_MODE_BLOCKING, (char) r[ 0 ] );
-  return 0;
+  int size = scale_uart_rd( SCALE_UART_MODE_BLOCKING);
+  if(size > n_r) size = n_r;
+  for (int i = 0; i < size; i++) {
+    r[i] = scale_uart_wr( SCALE_UART_MODE_BLOCKING, r[ 0 ] );
+  }
+  return size;
 }
 
 void reverse( uint8_t* input, uint8_t* output, int n){
   for(int i = 0; i < n; i++){
-    //output[i] = input[n-1-i];
+    output[i] = input[n-1-i];
   }
 }
 
 void octetstr_wr( const uint8_t* x, int n_x)
 {
-    //for(int i = 0; i < n_x; i++){
-      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (char) x[ 0 ] );
-    //}
+    for(int i = 0; i < n_x; i++){
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, x[ 0 ] );
+    }
 }

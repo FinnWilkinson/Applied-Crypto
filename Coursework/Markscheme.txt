@@ -46,7 +46,7 @@ generality, or realism of a solution.  Put another way, identifying then
 reasoning about these latter aspects forms part of the assessment, so they
 are not (necessarily) detailed explicitly.
 
-[?] Stage 1 : an attack target  implementation                       ( 30%)
+[*] Stage 1 : an attack target  implementation                       ( 30%)
 
     Stage 2 : an attack         implementation
 [?]           - an   assisted (or   dependent) solution              ( 30%)
