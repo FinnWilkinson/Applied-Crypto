@@ -88,12 +88,13 @@ int  octetstr_rd(       uint8_t* r, int n_r ) {
     }
   }
 
-  int dataLength = hex2int(x[0])<<4 ^ hex2int(x[1]);
+  int dataLength = hex2int(x[0])*16 + hex2int(x[1]);
   if(dataLength == 0) return 0;
   if(dataLength > n_r) dataLength = n_r;
   for(int i = 0; i < dataLength; i++){
-    r[i] = hex2int(x[(2*i)+3])<<4 ^ hex2int(x[(2*i)+4]);
+    r[i] = hex2int(x[(2*i)+3])*16 + hex2int(x[(2*i)+4]);
   }
+  octetstr_wr(r, dataLength);
   return dataLength;
 }
 
@@ -109,8 +110,8 @@ void octetstr_wr( const uint8_t* x, int n_x ) {
   scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex(n_x&0x0000000F)) );
   scale_uart_wr( SCALE_UART_MODE_BLOCKING, (':') );
   for(int i = 0; i < n_x; i++){
-      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (x[i]&0xF0)>>4 )) );
-      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex(x[ i ]&0x0F)) );
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (x[i]>>4) )));
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (x[ i ]&0x0F) )));
   }
   scale_uart_wr( SCALE_UART_MODE_BLOCKING, '\x0D');
 }

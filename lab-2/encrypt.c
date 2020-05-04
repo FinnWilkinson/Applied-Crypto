@@ -86,6 +86,7 @@ int main( int argc, char* argv[] ) {
   else {
     printf( "AES.Enc( k, m ) != c\n" );
   }*/
+  printf("%d\n", k[0]);
 
   printf("\nMy implementation: \n");
   aes_enc(t, m, k);
