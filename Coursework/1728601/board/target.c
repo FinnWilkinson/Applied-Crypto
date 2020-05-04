@@ -1,11 +1,11 @@
 /* Copyright (C) 2018 Daniel Page <csdsp@bristol.ac.uk>
  *
- * Use of this source code is restricted per the CC BY-NC-ND license, a copy of 
- * which can be found via http://creativecommons.org (and should be included as 
+ * Use of this source code is restricted per the CC BY-NC-ND license, a copy of
+ * which can be found via http://creativecommons.org (and should be included as
  * LICENSE.txt within the associated archive or repository).
  */
 
-#include "target.h" 
+#include "target.h"
 
 typedef uint8_t aes_gf28_t;
 
@@ -63,31 +63,77 @@ void aes_enc_rnd_sub(aes_gf28_t* s);
 void aes_enc_rnd_row(aes_gf28_t* s);
 void aes_enc_rnd_mix(aes_gf28_t* s);
 void aes_enc(uint8_t* c, uint8_t* m, uint8_t* k);
+uint8_t hex2int(char c);
+char int2hex(uint8_t c);
 
 /** Read  an octet string (or sequence of bytes) from the UART, using a simple
   * length-prefixed, little-endian hexadecimal format.
-  * 
+  *
   * \param[out] r the destination octet string read
   * \return       the number of octets read
   */
 
 int  octetstr_rd(       uint8_t* r, int n_r ) {
-  return 0;
+  int inputLength = 2 + 1 + 2*(n_r) + 1; //length + colon + data + terminator
+  char x[inputLength];
+  char temp;
+  for (int i = 0; true; i++) {
+    temp = scale_uart_rd( SCALE_UART_MODE_BLOCKING );
+    if(temp == '\x0D'){
+        x[i] = '\x00';
+        break;
+      }
+    if(i < inputLength){
+      x[i] = temp;
+    }
+  }
+
+  int dataLength = hex2int(x[0])<<4 ^ hex2int(x[1]);
+  if(dataLength == 0) return 0;
+  if(dataLength > n_r) dataLength = n_r;
+  for(int i = 0; i < dataLength; i++){
+    r[i] = hex2int(x[(2*i)+3])<<4 ^ hex2int(x[(2*i)+4]);
+  }
+  return dataLength;
 }
 
 /** Write an octet string (or sequence of bytes) to   the UART, using a simple
   * length-prefixed, little-endian hexadecimal format.
-  * 
+  *
   * \param[in]  r the source      octet string written
   * \param[in]  n the number of octets written
   */
 
 void octetstr_wr( const uint8_t* x, int n_x ) {
-  return;
+  scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (n_x&0x000000F0)>>4 )) );
+  scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex(n_x&0x0000000F)) );
+  scale_uart_wr( SCALE_UART_MODE_BLOCKING, (':') );
+  for(int i = 0; i < n_x; i++){
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (x[i]&0xF0)>>4 )) );
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex(x[ i ]&0x0F)) );
+  }
+  scale_uart_wr( SCALE_UART_MODE_BLOCKING, '\x0D');
+}
+
+//converts from a character to equivalent integer
+uint8_t hex2int(char c)
+{
+  if(c >= '0' && c <='9') return c - '0';
+  if(c >= 'A' && c <= 'F') return c - 'A' + 10;
+  if(c >= 'a' && c <= 'f') return c - 'a' + 10;
+  return -1;
+}
+
+//converts from integer to equivalent hex character
+char int2hex(uint8_t c)
+{
+  if(c >= 0 && c <=9) return c + '0';
+  if(c >= 10 && c <= 15) return c + 'A' - 10;
+  return -1;
 }
 
 //multiplies a by indeterminant x under modulo p(x)
-aes_gf28_t xtime( aes_gf28_t  a) { 
+aes_gf28_t xtime( aes_gf28_t  a) {
   //a = <1,0,0,0,1,1,1,0> = 1 + x4 + x5 + x6 = 1+16+32+64 = 113
   //a*x = x + x5 + x6 + x7 = <0,1,0,0,0,1,1,1> = 2+32+64+128 = 226
   //so is a logical shift left but need to deal with overflow
@@ -210,7 +256,7 @@ void aes_enc_rnd_mix(aes_gf28_t* s) {
   * keys, or perform randomised pre-computation in support of a countermeasure;
   * this can be left blank if no such initialisation is required, because the
   * same k and r will be passed as input to the encryption itself.
-  * 
+  *
   * \param[in]  k   an   AES-128 cipher key
   * \param[in]  r   some         randomness
   */
@@ -222,7 +268,7 @@ void aes_init(                               const uint8_t* k, const uint8_t* r 
 
 /** Perform    an AES-128 encryption of a plaintext m under a cipher key k, to
   * yield the corresponding ciphertext c.
-  * 
+  *
   * \param[out] c   an   AES-128 ciphertext
   * \param[in]  m   an   AES-128 plaintext
   * \param[in]  k   an   AES-128 cipher key
@@ -257,10 +303,10 @@ void aes     ( uint8_t* c, const uint8_t* m, const uint8_t* k, const uint8_t* r 
   *
   *    - write the SIZEOF_BLK parameter,
   *      i.e., number of bytes in an  AES-128 plaintext  m, or ciphertext c,
-  *      to the UART, 
+  *      to the UART,
   *    - write the SIZEOF_KEY parameter,
   *      i.e., number of bytes in an  AES-128 cipher key k,
-  *      to the UART, 
+  *      to the UART,
   *    - write the SIZEOF_RND parameter,
   *      i.e., number of bytes in the         randomness r.
   *      to the UART.
@@ -271,7 +317,7 @@ void aes     ( uint8_t* c, const uint8_t* m, const uint8_t* k, const uint8_t* r 
   *    - read  some         randomness r from the UART,
   *    - initalise the encryption,
   *    - set the trigger signal to 1,
-  *    - execute   the encryption, producing the ciphertext 
+  *    - execute   the encryption, producing the ciphertext
   *
   *      c = AES-128.Enc( m, k )
   *
@@ -293,7 +339,7 @@ int main( int argc, char* argv[] ) {
     return -1;
   }
 
-  uint8_t cmd[ 1 ], c[ SIZEOF_BLK ], m[ SIZEOF_BLK ], k[ SIZEOF_KEY ] = { 0xFC, 0x00, 0x24, 0xE2, 0x7B, 0x3A, 0x1A, 0x9A, 0x9D, 0xC5, 0xFC, 0xFF, 0xA1, 0x0A, 0x3F, 0xE7 }, r[ SIZEOF_RND ];
+  uint8_t cmd[ 1 ], c[ SIZEOF_BLK ], m[ SIZEOF_BLK ], k[ SIZEOF_KEY ] = {0xD3, 0x85, 0x33, 0x46, 0x02, 0x8B, 0x6E, 0x24, 0x86, 0x62, 0xE9, 0x95, 0xAB, 0x68, 0x7E, 0x25}/*{ 0xFC, 0x00, 0x24, 0xE2, 0x7B, 0x3A, 0x1A, 0x9A, 0x9D, 0xC5, 0xFC, 0xFF, 0xA1, 0x0A, 0x3F, 0xE7 }*/, r[ SIZEOF_RND ];
 
   while( true ) {
     if( 1 != octetstr_rd( cmd, 1 ) ) {
@@ -302,12 +348,12 @@ int main( int argc, char* argv[] ) {
 
     switch( cmd[ 0 ] ) {
       case COMMAND_INSPECT : {
-        uint8_t t = SIZEOF_BLK; 
-                    octetstr_wr( &t, 1 ); 
-                t = SIZEOF_KEY; 
-                    octetstr_wr( &t, 1 ); 
-                t = SIZEOF_RND; 
-                    octetstr_wr( &t, 1 ); 
+        uint8_t t = SIZEOF_BLK;
+                    octetstr_wr( &t, 1 );
+                t = SIZEOF_KEY;
+                    octetstr_wr( &t, 1 );
+                t = SIZEOF_RND;
+                    octetstr_wr( &t, 1 );
 
         break;
       }
