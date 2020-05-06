@@ -7,8 +7,6 @@
 
 #include "target.h"
 
-typedef uint8_t aes_gf28_t;
-
 #define AES_ENC_RND_KEY_STEP(a,b,c,d) { \
   s[a] = s[a] ^ rk[a];                  \
   s[b] = s[b] ^ rk[b];                  \
@@ -22,30 +20,30 @@ typedef uint8_t aes_gf28_t;
   s[d] = sbox(s[d]);                    \
 }
 #define AES_ENC_RND_ROW_STEP(a,b,c,d,e,f,g,h) { \
-  aes_gf28_t a1 = s[a];                         \
-  aes_gf28_t b1 = s[b];                         \
-  aes_gf28_t c1 = s[c];                         \
-  aes_gf28_t d1 = s[d];                         \
+  uint8_t a1 = s[a];                         \
+  uint8_t b1 = s[b];                         \
+  uint8_t c1 = s[c];                         \
+  uint8_t d1 = s[d];                         \
   s[e] = a1;                                    \
   s[f] = b1;                                    \
   s[g] = c1;                                    \
   s[h] = d1;                                    \
 }
 #define AES_ENC_RND_MIX_STEP(a,b,c,d) { \
-  aes_gf28_t a1 = s[a];                 \
-  aes_gf28_t b1 = s[b];                 \
-  aes_gf28_t c1 = s[c];                 \
-  aes_gf28_t d1 = s[d];                 \
+  uint8_t a1 = s[a];                 \
+  uint8_t b1 = s[b];                 \
+  uint8_t c1 = s[c];                 \
+  uint8_t d1 = s[d];                 \
                                         \
-  aes_gf28_t a2 = xtime(a1);            \
-  aes_gf28_t b2 = xtime(b1);            \
-  aes_gf28_t c2 = xtime(c1);            \
-  aes_gf28_t d2 = xtime(d1);            \
+  uint8_t a2 = xtime(a1);            \
+  uint8_t b2 = xtime(b1);            \
+  uint8_t c2 = xtime(c1);            \
+  uint8_t d2 = xtime(d1);            \
                                         \
-  aes_gf28_t a3 = a1^a2;                \
-  aes_gf28_t b3 = b1^b2;                \
-  aes_gf28_t c3 = c1^c2;                \
-  aes_gf28_t d3 = d1^d2;                \
+  uint8_t a3 = a1^a2;                \
+  uint8_t b3 = b1^b2;                \
+  uint8_t c3 = c1^c2;                \
+  uint8_t d3 = d1^d2;                \
                                         \
   s[a] = a2^b3^c1^d1;                   \
   s[b] = a1^b2^c3^d1;                   \
@@ -53,15 +51,15 @@ typedef uint8_t aes_gf28_t;
   s[d] = a3^b1^c1^d2;                   \
 }
 
-aes_gf28_t xtime( aes_gf28_t  a);
-aes_gf28_t sbox( aes_gf28_t a);
-aes_gf28_t aes_gf28_mul( aes_gf28_t a, aes_gf28_t b);
-aes_gf28_t aes_gf28_inv( aes_gf28_t a);
-void aes_enc_exp_step( aes_gf28_t* rk, aes_gf28_t rc);
-void aes_enc_rnd_key(aes_gf28_t* s, aes_gf28_t* rk);
-void aes_enc_rnd_sub(aes_gf28_t* s);
-void aes_enc_rnd_row(aes_gf28_t* s);
-void aes_enc_rnd_mix(aes_gf28_t* s);
+uint8_t xtime( uint8_t  a);
+uint8_t sbox( uint8_t a);
+uint8_t aes_gf28_mul( uint8_t a, uint8_t b);
+uint8_t aes_gf28_inv( uint8_t a);
+void aes_enc_exp_step( uint8_t* rk, uint8_t rc);
+void aes_enc_rnd_key(uint8_t* s, uint8_t* rk);
+void aes_enc_rnd_sub(uint8_t* s);
+void aes_enc_rnd_row(uint8_t* s);
+void aes_enc_rnd_mix(uint8_t* s);
 void aes_enc(uint8_t* c, uint8_t* m, uint8_t* k);
 uint8_t hex2int(char c);
 char int2hex(uint8_t c);
@@ -89,12 +87,12 @@ int  octetstr_rd(       uint8_t* r, int n_r ) {
   }
 
   int dataLength = hex2int(x[0])*16 + hex2int(x[1]);
+  //int dataLength = ((uint8_t)x[0])*16 + (uint8_t)x[1];
   if(dataLength == 0) return 0;
   if(dataLength > n_r) dataLength = n_r;
   for(int i = 0; i < dataLength; i++){
     r[i] = hex2int(x[(2*i)+3])*16 + hex2int(x[(2*i)+4]);
   }
-  octetstr_wr(r, dataLength);
   return dataLength;
 }
 
@@ -106,12 +104,12 @@ int  octetstr_rd(       uint8_t* r, int n_r ) {
   */
 
 void octetstr_wr( const uint8_t* x, int n_x ) {
-  scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (n_x&0x000000F0)>>4 )) );
+  scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (n_x&0x000000F0)/16 )) );
   scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex(n_x&0x0000000F)) );
   scale_uart_wr( SCALE_UART_MODE_BLOCKING, (':') );
   for(int i = 0; i < n_x; i++){
-      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (x[i]>>4) )));
-      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (x[ i ]&0x0F) )));
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, int2hex( (x[i]&0xF0)/16 ));
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, int2hex( (x[ i ]&0x0F) ));
   }
   scale_uart_wr( SCALE_UART_MODE_BLOCKING, '\x0D');
 }
@@ -120,8 +118,8 @@ void octetstr_wr( const uint8_t* x, int n_x ) {
 uint8_t hex2int(char c)
 {
   if(c >= '0' && c <='9') return c - '0';
-  if(c >= 'A' && c <= 'F') return c - 'A' + 10;
-  if(c >= 'a' && c <= 'f') return c - 'a' + 10;
+  if(c >= 'A' && c <= 'F') return c - 'A'+10;
+  if(c >= 'a' && c <= 'f') return c - 'a'+10;
   return -1;
 }
 
@@ -129,12 +127,12 @@ uint8_t hex2int(char c)
 char int2hex(uint8_t c)
 {
   if(c >= 0 && c <=9) return c + '0';
-  if(c >= 10 && c <= 15) return c + 'A' - 10;
+  if(c >= 10 && c <= 15) return c + 'A' -10;
   return -1;
 }
 
 //multiplies a by indeterminant x under modulo p(x)
-aes_gf28_t xtime( aes_gf28_t  a) {
+uint8_t xtime( uint8_t  a) {
   //a = <1,0,0,0,1,1,1,0> = 1 + x4 + x5 + x6 = 1+16+32+64 = 113
   //a*x = x + x5 + x6 + x7 = <0,1,0,0,0,1,1,1> = 2+32+64+128 = 226
   //so is a logical shift left but need to deal with overflow
@@ -150,8 +148,8 @@ aes_gf28_t xtime( aes_gf28_t  a) {
 }
 
 //multiply two aes_gf28 together under field F(2^8)
-aes_gf28_t aes_gf28_mul( aes_gf28_t a, aes_gf28_t b) {
-  aes_gf28_t t = 0;
+uint8_t aes_gf28_mul( uint8_t a, uint8_t b) {
+  uint8_t t = 0;
   for (int i = 7; i >= 0; i--) {
     t = xtime(t);
     if((b >> i) & 1) {
@@ -161,10 +159,10 @@ aes_gf28_t aes_gf28_mul( aes_gf28_t a, aes_gf28_t b) {
   return t;
 }
 
-aes_gf28_t aes_gf28_inv( aes_gf28_t a) {
+uint8_t aes_gf28_inv( uint8_t a) {
   //uses Lagranges theorem
-  aes_gf28_t pos0 = aes_gf28_mul(a,a);
-  aes_gf28_t pos1 = aes_gf28_mul(pos0,a);
+  uint8_t pos0 = aes_gf28_mul(a,a);
+  uint8_t pos1 = aes_gf28_mul(pos0,a);
   pos0 = aes_gf28_mul( pos0, pos0 );
   pos1 = aes_gf28_mul( pos1, pos0 );
   pos0 = aes_gf28_mul( pos0, pos0 );
@@ -177,18 +175,18 @@ aes_gf28_t aes_gf28_inv( aes_gf28_t a) {
   return pos0;
 }
 
-aes_gf28_t sbox( aes_gf28_t a) {
+uint8_t sbox( uint8_t a) {
   //sbox(a) = f(g(a))
   //g(a) = 1 / a (field inversion)
   //f = affine transformation
   //<1,1,0,0,0,1,1,0>
-  aes_gf28_t gOfa = aes_gf28_inv(a);
-  aes_gf28_t fOfa = (0x63)^gOfa^(gOfa<<1)^(gOfa<<2)^(gOfa<<3)^(gOfa<<4)^(gOfa>>7)^(gOfa>>6)
+  uint8_t gOfa = aes_gf28_inv(a);
+  uint8_t fOfa = (0x63)^gOfa^(gOfa<<1)^(gOfa<<2)^(gOfa<<3)^(gOfa<<4)^(gOfa>>7)^(gOfa>>6)
                     ^(gOfa>>5)^(gOfa>>4);
   return fOfa;
 }
 
-void aes_enc_exp_step( aes_gf28_t* rk, aes_gf28_t rc) {
+void aes_enc_exp_step( uint8_t* rk, uint8_t rc) {
   //produces i-th+1 round key matrix
   //ith round means: i*4<= j <= ((i+1)*4)-1
   //j = 0 (mod 4) for all 1st column
@@ -221,7 +219,7 @@ void aes_enc_exp_step( aes_gf28_t* rk, aes_gf28_t rc) {
 
 }
 
-void aes_enc_rnd_key(aes_gf28_t* s, aes_gf28_t* rk) {
+void aes_enc_rnd_key(uint8_t* s, uint8_t* rk) {
   //Add-RoundKey function using macro
   AES_ENC_RND_KEY_STEP(0,1,2,3); //col1
   AES_ENC_RND_KEY_STEP(4,5,6,7); //col2
@@ -229,7 +227,7 @@ void aes_enc_rnd_key(aes_gf28_t* s, aes_gf28_t* rk) {
   AES_ENC_RND_KEY_STEP(12,13,14,15); //col4
 }
 
-void aes_enc_rnd_sub(aes_gf28_t* s) {
+void aes_enc_rnd_sub(uint8_t* s) {
   //Sub-Bytes function using macro
   AES_ENC_RND_SUB_STEP(0,1,2,3);
   AES_ENC_RND_SUB_STEP(4,5,6,7);
@@ -237,7 +235,7 @@ void aes_enc_rnd_sub(aes_gf28_t* s) {
   AES_ENC_RND_SUB_STEP(12,13,14,15);
 }
 
-void aes_enc_rnd_row(aes_gf28_t* s) {
+void aes_enc_rnd_row(uint8_t* s) {
   //Shift-Rows function using macro
   //row 0 doesnt change
   AES_ENC_RND_ROW_STEP(1,5,9,13,13,1,5,9); //row 1
@@ -245,12 +243,12 @@ void aes_enc_rnd_row(aes_gf28_t* s) {
   AES_ENC_RND_ROW_STEP(3,7,11,15,7,11,15,3); //row 3
 }
 
-void aes_enc_rnd_mix(aes_gf28_t* s) {
+void aes_enc_rnd_mix(uint8_t* s) {
   //Mix-Columns function using macro
   AES_ENC_RND_MIX_STEP(0,1,2,3);
   AES_ENC_RND_MIX_STEP(4,5,6,7);
   AES_ENC_RND_MIX_STEP(8,9,10,11);
-  AES_ENC_RND_MIX_STEP(12,13,14,15);
+  AES_ENC_RND_MIX_STEP(12,13,14,15);  
 }
 
 /** Initialise an AES-128 encryption, e.g., expand the cipher key k into round
@@ -277,23 +275,26 @@ void aes_init(                               const uint8_t* k, const uint8_t* r 
   */
 
 void aes     ( uint8_t* c, const uint8_t* m, const uint8_t* k, const uint8_t* r ) {
-  memcpy(c, m, 16*sizeof(aes_gf28_t));
-  aes_gf28_t rc[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
+  memcpy(c, m, 16*sizeof(uint8_t));
+
+  uint8_t key[SIZEOF_KEY];
+  memcpy(key, k, SIZEOF_KEY*sizeof(uint8_t));
+  uint8_t rc[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
   //1 initial round
-  aes_enc_rnd_key(c, k);
+  aes_enc_rnd_key(c, key);
   //Nr-1 iterated rounds with Nr = 10 for AES-128
   for (int i = 1; i < 10; i++) {
     aes_enc_rnd_sub(c);
     aes_enc_rnd_row(c);
     aes_enc_rnd_mix(c);
-    aes_enc_exp_step(k, rc[i-1]);
-    aes_enc_rnd_key(c, k);
+    aes_enc_exp_step(key, rc[i-1]);
+    aes_enc_rnd_key(c, key);
   }
   //1 final round
   aes_enc_rnd_sub(c);
   aes_enc_rnd_row(c);
-  aes_enc_exp_step(c, rc[9]);
-  aes_enc_rnd_key(c, k);
+  aes_enc_exp_step(key, rc[9]);
+  aes_enc_rnd_key(c, key);
   return;
 }
 

@@ -91,10 +91,10 @@ int octetstr_rd( uint8_t* r, int  n_r){
     }
   }
 
-  int dataLength = hex2int(x[0])*16 + hex2int(x[1]);
+  int dataLength = (x[0])*16 + (x[1]);
   if(dataLength > n_r) dataLength = n_r;
   for(int i = 0; i < dataLength; i++){
-    r[i] = hex2int(x[(2*i)+3])*16 + hex2int(x[(2*i)+4]);
+    r[i] = (x[(2*i)+3])*16 + (x[(2*i)+4]);
   }
   return dataLength;
 
@@ -109,7 +109,7 @@ void reverse( uint8_t* input, uint8_t* output, int n){
 void octetstr_wr( const uint8_t* x, int n_x)
 {
     for(int i = 0; i < n_x; i++){
-      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (x[i]&0xF0)/16 )) );
-      scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex(x[ i ]&0x0F)) );
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, int2hex((x[i]&0xF0)/16));
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, int2hex(x[ i ]&0x0F));
     }
 }
