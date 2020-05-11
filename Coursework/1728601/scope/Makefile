@@ -14,7 +14,7 @@ TRACES = traces.dat
 
 attack-1728601    :
 	@./1728601.elf
-attack-1728601-ld :
-	@./1728601.elf --traces-ld ${TRACES}
-attack-1728601-st :
-	@./1728601.elf --traces-st ${TRACES}
+attack-1728601-rd :
+	@./1728601.elf --traces-rd ${TRACES}
+attack-1728601-wr :
+	@./1728601.elf --traces-wr ${TRACES}

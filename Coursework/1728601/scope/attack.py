@@ -82,8 +82,10 @@ def traces_st( f, t, s, M, C, T ) :
 ## \param[in] argc number of command line arguments
 ## \param[in] argv           command line arguments
 
-def attack( argc, argv )
-  pass
+def attack( argc, argv ):
+  number_traces, number_samples, plaintexts, ciphertexts, samples = traces_ld(argv[argc-1])
+  
+  
 
 if ( __name__ == '__main__' ) :
   attack( len( sys.argv ), sys.argv )

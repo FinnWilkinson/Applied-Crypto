@@ -87,7 +87,6 @@ int  octetstr_rd(       uint8_t* r, int n_r ) {
   }
 
   int dataLength = hex2int(x[0])*16 + hex2int(x[1]);
-  //int dataLength = ((uint8_t)x[0])*16 + (uint8_t)x[1];
   if(dataLength == 0) return 0;
   if(dataLength > n_r) dataLength = n_r;
   for(int i = 0; i < dataLength; i++){
@@ -104,12 +103,12 @@ int  octetstr_rd(       uint8_t* r, int n_r ) {
   */
 
 void octetstr_wr( const uint8_t* x, int n_x ) {
-  scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (n_x&0x000000F0)/16 )) );
+  scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex( (n_x&0x000000F0)>>4 )) );
   scale_uart_wr( SCALE_UART_MODE_BLOCKING, (int2hex(n_x&0x0000000F)) );
   scale_uart_wr( SCALE_UART_MODE_BLOCKING, (':') );
   for(int i = 0; i < n_x; i++){
-      scale_uart_wr( SCALE_UART_MODE_BLOCKING, int2hex( (x[i]&0xF0)/16 ));
-      scale_uart_wr( SCALE_UART_MODE_BLOCKING, int2hex( (x[ i ]&0x0F) ));
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, int2hex( (x[i]&0xF0)>>4 ));
+      scale_uart_wr( SCALE_UART_MODE_BLOCKING, int2hex( (x[i]&0x0F) ));
   }
   scale_uart_wr( SCALE_UART_MODE_BLOCKING, '\x0D');
 }
@@ -275,7 +274,7 @@ void aes_init(                               const uint8_t* k, const uint8_t* r 
   */
 
 void aes     ( uint8_t* c, const uint8_t* m, const uint8_t* k, const uint8_t* r ) {
-  memcpy(c, m, 16*sizeof(uint8_t));
+  memcpy(c, m, SIZEOF_BLK*sizeof(uint8_t));
 
   uint8_t key[SIZEOF_KEY];
   memcpy(key, k, SIZEOF_KEY*sizeof(uint8_t));
