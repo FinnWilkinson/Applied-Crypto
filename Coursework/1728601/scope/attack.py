@@ -4,7 +4,7 @@
 # which can be found via http://creativecommons.org (and should be included as 
 # LICENSE.txt within the associated archive or repository).
 
-import numpy, struct, sys
+import numpy, struct, sys, math, time
 
 ## Load  a trace data set from an on-disk file.
 ## 
@@ -83,9 +83,70 @@ def traces_st( f, t, s, M, C, T ) :
 ## \param[in] argv           command line arguments
 
 def attack( argc, argv ):
+  start_time = time.time()
+
+  print("Loading in Data ...")
   number_traces, number_samples, plaintexts, ciphertexts, samples = traces_ld(argv[argc-1])
-  
-  
+  print("Finished Loading\n")
+
+  #set up needed constant values
+  hamming_Weights = numpy.zeros(256, dtype=numpy.uint8 ) #hamming weight lookup table
+  for i in range(0,256):
+    hamming_Weights[i] = (getHammingWeight(i))
+  key_Bytes = numpy.arange(0,256, dtype = numpy.uint8 ) #key hypothesis
+
+  #initialise needed data arrays
+  values = numpy.zeros( (number_traces,256) , dtype = numpy.uint8 ) #plaintext xor keyguess
+  hype_Power_Values = numpy.zeros( (number_traces, 256) , dtype = numpy.uint8 ) #hypothetical power values
+  correlation_results = numpy.zeros( (256, number_samples) ) #correlation values
+  final_Key_Guess = numpy.zeros(16, dtype = numpy.uint8 ) #final key guess
+
+  for i in range(0,16) :
+    print("Making Guess for Key Byte {} ..." .format(i+1))
+    #calc values of byte i (i-th message byte xor with each keybyte ) = V (size 1000x256)
+    for y in range(0, number_traces):
+      for x in range(0, 256):
+        values[y,x] = plaintexts[y,i] ^ key_Bytes[x]
+    #H = hamming weight of each value in V
+    for y in range(0, number_traces):
+      for x in range(0, 256):
+        hype_Power_Values[y,x] = getHammingWeight(values[y,x])
+    #compare each column of H with each column of T and get correlation coeficient matrix R: h(i) with t(j) for i=1,..,K and j=1,..,T
+    for y in range(0, number_samples):
+      for x in range(0, 256):
+        #correlation_results[x,y] = calcCorrelationValue(hype_Power_Values[:,x], samples[:,y])
+        calcCorrelationValue(hype_Power_Values[:,x], samples[:,y])
+    #value with highest correlation value's row = key value guess
+    max_Correlation_Val = 0
+    max_correlation_index = -1
+    for y in range(0, number_samples):
+      for x in range(0, 256):
+        if correlation_results[x,y] > max_Correlation_Val:
+          max_Correlation_Val = correlation_results[x,y]
+          max_correlation_index = x
+
+    final_Key_Guess[i] = max_correlation_index
+    print("Guess Made for Key Byte {}\n" .format(i+1))
+
+  print("Secret Key Guess : {}" .format(final_Key_Guess))
+  print("Plaintext Example : {}" .format(plaintexts[0,:]))
+  print("Ciphertext Example : {}\n" .format(ciphertexts[0,:]))
+
+  print("Time Elapsed : {} Seconds\n" .format(time.time()-start_time))
+
+#calulate the hamming weight of a number n
+def getHammingWeight(n):
+  c = 0
+  while n:
+    c += 1
+    n &= n-1
+  return c
+
+#calculate the correlation value of the columns provided
+# h_col = hypothesis power value column
+# t_col = actual trace power value column
+def calcCorrelationValue(h_col, t_col):
+  return numpy.cov(h_col, t_col) / math.sqrt( numpy.var(h_col) * numpy.var(t_col) )
 
 if ( __name__ == '__main__' ) :
   attack( len( sys.argv ), sys.argv )
