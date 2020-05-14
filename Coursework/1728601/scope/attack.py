@@ -98,7 +98,7 @@ def attack( argc, argv ):
   #initialise needed data arrays
   values = numpy.zeros( (number_traces,256) , dtype = numpy.uint8 ) #plaintext xor keyguess
   hype_Power_Values = numpy.zeros( (number_traces, 256) , dtype = numpy.uint8 ) #hypothetical power values
-  correlation_results = numpy.zeros( (256, 100) ) #correlation values
+  correlation_results = numpy.zeros( (256, number_samples) ) #correlation values
   final_Key_Guess = numpy.zeros(16, dtype = numpy.uint8 ) #final key guess
 
   for i in range(0,16) :
@@ -107,35 +107,25 @@ def attack( argc, argv ):
     print("Forming Intermediate Values ...")
     for y in range(0, number_traces):
       for x in range(0, 256):
-        values[y,x] = getHammingWeight(plaintexts[y,i] ^ key_Bytes[x])
+        values[y,x] = hamming_Weights[(plaintexts[y,i] ^ key_Bytes[x])]
 
     #H = hamming weight of each value in V
     print("Calculating Hamming Weights ...")
     hype_Power_Values = values
-    #for y in range(0, number_traces):
-    #  for x in range(0, 256):
-    #    hype_Power_Values[y,x] = getHammingWeight(values[y,x])
 
     #compare each column of H with each column of T and get correlation coeficient matrix R: h(i) with t(j) for i=1,..,K and j=1,..,T
     print("Calculating Correlation With Aquired Traces ...")
     max_Correlation_Val = 0
     max_correlation_index = -1
-    for y in range(0, 100):
+    for y in range(0, 10000):
       for x in range(0, 256):
-        correlation_results[x,y] = calcCorrelationValue(hype_Power_Values[:,x], samples[:,y])
+        correlation_results[x,y] = calcCorrelationValue((hype_Power_Values[:,x]).astype(int), numpy.single(samples[:,y]).astype(int))
         if correlation_results[x,y] > max_Correlation_Val:
           max_Correlation_Val = correlation_results[x,y]
           max_correlation_index = x
-
     #value with highest correlation value's row = key value guess
-    #max_Correlation_Val = 0
-    #max_correlation_index = -1
-    #for y in range(0, number_samples):
-    #  for x in range(0, 256):
-    #    if correlation_results[x,y] > max_Correlation_Val:
-    #      max_Correlation_Val = correlation_results[x,y]
-    #      max_correlation_index = x
-
+    print(max_Correlation_Val)
+    print(max_correlation_index)
     final_Key_Guess[i] = max_correlation_index
     print("Guess Made for Key Byte {}\n" .format(i+1))
 
@@ -156,17 +146,17 @@ def getHammingWeight(n):
   return c
 
 #calculate the correlation value of the columns provided
-# h_col = hypothesis power value column
-# t_col = actual trace power value column
+# \param[in] h_col = hypothesis power value column
+# \param[in] t_col = actual trace power value column
 def calcCorrelationValue(h_col, t_col):
   h_mean = numpy.mean(h_col)
   t_mean = numpy.mean(t_col)
-
-  h_col = [x-h_mean for x in h_col.astype(float)] 
-  t_col = [x-t_mean for x in t_col.astype(float)]
+  
+  h_col = numpy.subtract(h_col, h_mean)
+  t_col = numpy.subtract(t_col, t_mean)
 
   covariance = numpy.sum(numpy.multiply(h_col, t_col))
-  denominator = math.sqrt(numpy.sum(numpy.multiply(h_col, h_col)) * numpy.sum(numpy.multiply(t_col, t_col)))
+  denominator = math.sqrt(numpy.sum(numpy.power(h_col, 2)) * numpy.sum(numpy.power(t_col, 2)))
 
   if denominator != 0:
     return covariance / denominator

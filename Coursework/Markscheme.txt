@@ -16,7 +16,7 @@
 So that we can calibrate and improve the assignment in the future, give us
 a rough idea how long (in hours) you spent on it *in total*:
 
-effort : [10] hours
+effort : [18] hours
 
 -------------------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ are not (necessarily) detailed explicitly.
 [X] Stage 1 : an attack target  implementation                       ( 30%)
 
     Stage 2 : an attack         implementation
-[?]           - an   assisted (or   dependent) solution              ( 30%)
+[*]           - an   assisted (or   dependent) solution              ( 30%)
                 *OR*
 [?]           - an unassisted (or independent) solution              ( 40%)
 
