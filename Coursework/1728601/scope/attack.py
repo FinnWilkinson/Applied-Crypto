@@ -100,15 +100,14 @@ def attack( argc, argv ):
   hype_Power_Values = numpy.zeros( (number_traces, 256) , dtype = numpy.uint8 ) #hypothetical power values
   correlation_results = numpy.zeros( (256, number_samples) ) #correlation values
   final_Key_Guess = numpy.zeros(16, dtype = numpy.uint8 ) #final key guess
-
+  print("Sample Values: {}" .format(samples[0,:100]))
   for i in range(0,16) :
     print("Making Guess for Key Byte {} ..." .format(i+1))
     #calc values of byte i (i-th message byte xor with each keybyte ) = V (size 1000x256)
     print("Forming Intermediate Values ...")
     for y in range(0, number_traces):
       for x in range(0, 256):
-        values[y,x] = hamming_Weights[(plaintexts[y,i] ^ key_Bytes[x])]
-
+        values[y,x] = hamming_Weights[sbox(plaintexts[y,i] ^ key_Bytes[x])]
     #H = hamming weight of each value in V
     print("Calculating Hamming Weights ...")
     hype_Power_Values = values
@@ -117,7 +116,7 @@ def attack( argc, argv ):
     print("Calculating Correlation With Aquired Traces ...")
     max_Correlation_Val = 0
     max_correlation_index = -1
-    for y in range(0, 10000):
+    for y in range(0,2000):
       for x in range(0, 256):
         correlation_results[x,y] = calcCorrelationValue((hype_Power_Values[:,x]).astype(int), numpy.single(samples[:,y]).astype(int))
         if correlation_results[x,y] > max_Correlation_Val:
@@ -162,6 +161,40 @@ def calcCorrelationValue(h_col, t_col):
     return covariance / denominator
   else:
     return 0
+
+#SBOX and helper funtions
+def sbox( input ):
+  gOfa = numpy.uint8(aes_gf28_inv(input))
+  fOfa = (0x63)^gOfa^(gOfa<<1)^(gOfa<<2)^(gOfa<<3)^(gOfa<<4)^(gOfa>>7)^(gOfa>>6)^(gOfa>>5)^(gOfa>>4)
+  return fOfa
+
+def aes_gf28_inv( a ):
+  pos0 = numpy.uint8(aes_gf28_mul(a,a))
+  pos1 = numpy.uint8(aes_gf28_mul(pos0,a))
+  pos0 = aes_gf28_mul( pos0, pos0 )
+  pos1 = aes_gf28_mul( pos1, pos0 )
+  pos0 = aes_gf28_mul( pos0, pos0 )
+  pos0 = aes_gf28_mul( pos1, pos0 )
+  pos0 = aes_gf28_mul( pos0, pos0 )
+  pos0 = aes_gf28_mul( pos0, pos0 )
+  pos1 = aes_gf28_mul( pos1, pos0 )
+  pos0 = aes_gf28_mul( pos0, pos1 )
+  pos0 = aes_gf28_mul( pos0, pos0 )
+  return pos0
+
+def aes_gf28_mul( a, b ):
+  t = numpy.uint8(0)
+  for i in range(7, -1):
+    t = xtime(t)
+    if((b>>i) & 1):
+      t ^= a
+  return t
+
+def xtime( a ):
+  if((a & 0x80) == 0x80):
+    return (0x1B ^ (a << 1))
+  else:
+    return (a << 1)
 
 if ( __name__ == '__main__' ) :
   attack( len( sys.argv ), sys.argv )
