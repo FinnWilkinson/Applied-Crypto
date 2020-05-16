@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 void attack( int argc, char* argv[] );
 void traces_ld(char* f, int* t, int* s, uint8_t** M, uint8_t** C, int16_t** T);
-float calcCorrelationValue(uint8_t* values, int16_t* samples , int key_hype_number, int sample_number);
+float calcCorrelationValue(uint8_t** values, int16_t** samples, int key_hype_number, int sample_number, int number_traces, int number_samples);
 uint8_t sbox( uint8_t a); 
 uint8_t xtime( uint8_t a);
 uint8_t aes_gf28_mul( uint8_t a, uint8_t b);
@@ -49,10 +50,9 @@ void attack( int argc, char* argv[] )
   }
   
   //Initialise needed data arrays
-  uint8_t values[number_traces * 256];                  //Sbox result hypothetical power values
-  float *correlation_values;                            //Corelation values
-  correlation_values = malloc(256 * number_samples * sizeof(float));
-  uint8_t final_key_guess[16];                            //Secret Key guess
+  uint8_t *values;                                      //Sbox result hypothetical power values
+  values = malloc(number_traces * 256 * sizeof(uint8_t));
+  uint8_t final_key_guess[16];                          //Secret Key guess
   //Main attack loop
   for(int i=0; i<16; i++){
     printf("Making Guess for Key Byte %d ...\n", i+1);
@@ -60,27 +60,33 @@ void attack( int argc, char* argv[] )
     printf("Calculating Hypothetical Power Usage ...\n");
     for(int y=0; y<number_traces; y++){
       for(int x=0; x<256; x++){
-        values[(y*256) + x] = hamming_Weights[sbox(plaintexts[(y*16) + i] ^ key_values[x])];
+        values[(x*number_traces) + y] = hamming_Weights[sbox(plaintexts[(y*16) + i] ^ key_values[x])];
       }
     }
 
     printf("Calculating Correlation With Aquired Traces ...\n");
-    float max_Correlation_Val = 0.0f;
+    float max_Correlation_Val = -1.0f;
+    float min_Correlation_Val = 1.0f;
+    int min_correlation_index = -1;
     int max_correlation_index = -1;
+    float result = 0.0f;
     for(int y=0; y<number_samples; y++){
       for(int x=0; x<256; x++){
-        //mend
-        correlation_values[(y*256) + x] = calcCorrelationValue(values, samples, x, y);
-        if (correlation_values[(y*256) + x] > max_Correlation_Val){
-          max_Correlation_Val = correlation_values[(y*256) + x];
+        result = calcCorrelationValue(&values, &samples, x, y, number_traces, number_samples);
+        if (result > max_Correlation_Val){
+          max_Correlation_Val = result;
           max_correlation_index = x;
+        }
+        else if (result < min_Correlation_Val){
+          min_Correlation_Val = result;
+          min_correlation_index = x;
         }
       }
     }
-    //value with highest correlation value's row = key value guess
-    printf("%f\n", max_Correlation_Val);
-    printf("%d\n", max_correlation_index);
-    final_key_guess[i] = max_correlation_index;
+    
+    //value with biggest correlation value's row = key value guess
+    if(max_Correlation_Val > -min_Correlation_Val) final_key_guess[i] = max_correlation_index;
+    else if(min_Correlation_Val < -max_Correlation_Val) final_key_guess[i] = min_correlation_index;
 
     printf("Guess Made for Key Byte %d\n\n", i+1);
   }
@@ -95,15 +101,15 @@ void attack( int argc, char* argv[] )
   }
   printf("}\n");
 
-  printf("Plaintext Example : {%x", plaintexts[0]);
+  printf("Plaintext Example : {%x", plaintexts[16]);
   for(int i=1; i<16; i++){
-    printf(", %x", plaintexts[i]);
+    printf(", %x", plaintexts[16+i]);
   }
   printf("}\n");
   
-  printf("Ciphertext Example : {%x", ciphertexts[0]);
+  printf("Ciphertext Example : {%x", ciphertexts[16]);
   for(int i=1; i<16; i++){
-    printf(", %x", ciphertexts[i]);
+    printf(", %x", ciphertexts[16+i]);
   }
   printf("}\n");     
 }
@@ -130,30 +136,19 @@ void traces_ld(char* f, int* t, int* s, uint8_t** M, uint8_t** C, int16_t** T)
   M[0] = malloc(t[0]*16*sizeof(uint8_t));
   C[0] = malloc(t[0]*16*sizeof(uint8_t));
   T[0] = malloc(t[0]*s[0]*sizeof(int16_t));
+
   //get Plaintexts
-  uint8_t message_input[16];
-  for(int i=0; i<t[0]; i++){
-    fread(message_input, 16, 1, data);
-    for(int j=0; j<16; j++){
-      M[0][(i*16) + j] = message_input[j];
-    }
-  }
+  fread(&M[0][0], 1, 16*t[0], data);
 
   //get Ciphertext
-  uint8_t ciphertext_input[16];
-  for(int i=0; i<t[0]; i++){
-    fread(ciphertext_input, 16, 1, data);
-    for(int j=0; j<16; j++){
-      C[0][(i*16) + j] = ciphertext_input[j];
-    }
-  }
+  fread(&C[0][0], 1, 16*t[0], data);
 
-  //get trace data
-  int16_t trace_input[s[0]];
+  //get trace data, stored in column major
+  int16_t data_buffer[s[0]];
   for(int i=0; i<t[0]; i++){
-    fread(trace_input, s[0], 1, data);
+    fread(data_buffer, 2, s[0], data);
     for(int j=0; j<s[0]; j++){
-      T[0][(i*s[0]) + j] = ((int16_t)trace_input[j]);
+      T[0][i + (j*t[0])] = data_buffer[j];
     }
   }
 
@@ -162,12 +157,27 @@ void traces_ld(char* f, int* t, int* s, uint8_t** M, uint8_t** C, int16_t** T)
 }
 
 //calculate the correlation value of the columns provided
-// \param[in] h_col = hypothesis power value column
-// \param[in] t_col = actual trace power value column
-float calcCorrelationValue(uint8_t* values, int16_t* samples , int key_hype_number, int sample_number)
+float calcCorrelationValue(uint8_t** values, int16_t** samples, int key_hype_number, int sample_number, int number_traces, int number_samples)
 {
+  float values_mean = 0.0f;
+  float samples_mean = 0.0f;
+  for(int i=0; i<number_traces; i++){
+    values_mean += values[0][(key_hype_number*number_traces) + i];
+    samples_mean += samples[0][(sample_number*number_traces) + i];
+  }
+  values_mean /= number_traces;
+  samples_mean /= number_traces;
+  
+  float covariance = 0.0f;
+  float var_values = 0.0f;
+  float var_samples = 0.0f;
+  for(int i=0; i<number_traces; i++){
+    covariance += (values[0][(key_hype_number*number_traces) + i] - values_mean) * (samples[0][(sample_number*number_traces) + i] - samples_mean);
+    var_values += (values[0][(key_hype_number*number_traces) + i] - values_mean) * (values[0][(key_hype_number*number_traces) + i] - values_mean);
+    var_samples += (samples[0][(sample_number*number_traces) + i] - samples_mean) * (samples[0][(sample_number*number_traces) + i] - samples_mean);
+  }
 
-  return 0.0f;
+  return (covariance / (sqrt(var_values) * sqrt(var_samples)) );
 }
 
 uint8_t sbox( uint8_t a) {

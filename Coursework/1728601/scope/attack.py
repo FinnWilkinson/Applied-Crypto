@@ -5,6 +5,7 @@
 # LICENSE.txt within the associated archive or repository).
 
 import numpy, struct, sys, math, time
+import matplotlib.pyplot as plt
 
 ## Load  a trace data set from an on-disk file.
 ## 
@@ -88,7 +89,9 @@ def attack( argc, argv ):
   print("Loading in Data ...")
   number_traces, number_samples, plaintexts, ciphertexts, samples = traces_ld(argv[argc-1])
   print("Finished Loading\n")
-
+  plt.plot(samples)
+  plt.show()
+  return
   #set up needed constant values
   hamming_Weights = numpy.zeros(256, dtype=numpy.uint8 ) #hamming weight lookup table
   for i in range(0,256):
