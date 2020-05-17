@@ -31,7 +31,10 @@ resources is allowed *iff.* it
 Let us know any third-party source code or resources you used (if any) so
 it's clear what's your work and what isn't:
 
-[...]
+[
+  - OpenSSl/aes.h used in attack.c in order to verify the key guess against the plaintexts and
+    ciphertexts read in from the traces data file after guess has been comleted
+]
 
 -------------------------------------------------------------------------------
 
@@ -82,7 +85,7 @@ source code) should go here:
 		make putty-emulator
 
   - attack.c was built using the following compile command in the terminal:
-		gcc -std=c99 -Wall -Ofast attack.c -o attack
+		gcc -std=c99 -Wall -Ofast -lcrypto attack.c -o attack
 
   - attack is then executed (to perform attack on provided trace data trace.dat) using the following command in terinal:
 		./attack traces.dat

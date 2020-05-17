@@ -1,9 +1,11 @@
-#include  <stdio.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <math.h>
+
+#include <openssl/aes.h>
 
 void attack( int argc, char* argv[] );
 void traces_ld(char* f, int* t, int* s, uint8_t** M, uint8_t** C, int16_t** T);
@@ -13,6 +15,7 @@ uint8_t xtime( uint8_t a);
 uint8_t aes_gf28_mul( uint8_t a, uint8_t b);
 uint8_t aes_gf28_inv( uint8_t a);
 
+void check_key(uint8_t* plaintexts, uint8_t* ciphertexts, uint8_t* key);
 
 int main( int argc, char* argv[] ) 
 {
@@ -40,7 +43,7 @@ void attack( int argc, char* argv[] )
   //Load in data
   printf("Loading in Data ...\n");
   traces_ld(argv[argc-1], &number_traces, &number_samples, &plaintexts, &ciphertexts, &samples);
-  printf("... Finished Loading\n");
+  printf("... Finished Loading\n\n");
 
   //set up needed constant values
   uint8_t hamming_Weights[256], key_values[256];
@@ -99,19 +102,32 @@ void attack( int argc, char* argv[] )
   for(int i=1; i<16; i++){
     printf(", %x", final_key_guess[i]);
   }
-  printf("}\n");
+  printf("}\n\n");     
 
-  printf("Plaintext Example : {%x", plaintexts[32]);
-  for(int i=1; i<16; i++){
-    printf(", %x", plaintexts[32+i]);
+  check_key(plaintexts, ciphertexts, final_key_guess);
+}
+
+void check_key(uint8_t* plaintexts, uint8_t* ciphertexts, uint8_t* key)
+{
+  printf("Validating Key Guess ...\n");
+  AES_KEY rk;
+  AES_set_encrypt_key( key, 128, &rk );
+
+  uint8_t output[16], plaintext_hold[16], ciphertext_hold[16];
+  for(int i=0; i<1000; i++){
+    memcpy(plaintext_hold, plaintexts + (i*16), 16*(sizeof(uint8_t)));
+    memcpy(ciphertext_hold, ciphertexts + (i*16), 16*(sizeof(uint8_t)));
+    //encrypt
+    AES_encrypt(plaintext_hold, output, &rk);
+    //check output
+    for(int j=0; j<16; j++){
+      if(output[j] != ciphertext_hold[j]){
+        printf("Wrong Key. Failed at : %d\n", i);
+        exit(0);
+      }
+    }
   }
-  printf("}\n");
-  
-  printf("Ciphertext Example : {%x", ciphertexts[32]);
-  for(int i=1; i<16; i++){
-    printf(", %x", ciphertexts[32+i]);
-  }
-  printf("}\n");     
+  printf("Correct Key Guess!\n");
 }
   
 //Load  a trace data set from an on-disk file.
@@ -159,6 +175,7 @@ void traces_ld(char* f, int* t, int* s, uint8_t** M, uint8_t** C, int16_t** T)
 //calculate the correlation value of the columns provided
 float calcCorrelationValue(uint8_t** values, int16_t** samples, int key_hype_number, int sample_number, int number_traces, int number_samples)
 {
+  //calculate mean of each row (as both trace values and samples are in column major for speed)
   float values_mean = 0.0f;
   float samples_mean = 0.0f;
   for(int i=0; i<number_traces; i++){
@@ -168,6 +185,7 @@ float calcCorrelationValue(uint8_t** values, int16_t** samples, int key_hype_num
   values_mean /= number_traces;
   samples_mean /= number_traces;
   
+  //calculate appropriate covariance and variances for Correlation Coefficient calculation
   float covariance = 0.0f;
   float var_values = 0.0f;
   float var_samples = 0.0f;
@@ -180,6 +198,7 @@ float calcCorrelationValue(uint8_t** values, int16_t** samples, int key_hype_num
   return (covariance / (sqrt(var_values) * sqrt(var_samples)) );
 }
 
+//ALL CODE BELOW IS FOR S-BOX IMPLEMENTATION USED IN target.c PROGRAM
 uint8_t sbox( uint8_t a) {
   uint8_t gOfa = aes_gf28_inv(a);
   uint8_t fOfa = (0x63)^gOfa^(gOfa<<1)^(gOfa<<2)^(gOfa<<3)^(gOfa<<4)^(gOfa>>7)^(gOfa>>6)
