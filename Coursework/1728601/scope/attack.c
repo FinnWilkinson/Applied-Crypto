@@ -101,15 +101,15 @@ void attack( int argc, char* argv[] )
   }
   printf("}\n");
 
-  printf("Plaintext Example : {%x", plaintexts[16]);
+  printf("Plaintext Example : {%x", plaintexts[32]);
   for(int i=1; i<16; i++){
-    printf(", %x", plaintexts[16+i]);
+    printf(", %x", plaintexts[32+i]);
   }
   printf("}\n");
   
-  printf("Ciphertext Example : {%x", ciphertexts[16]);
+  printf("Ciphertext Example : {%x", ciphertexts[32]);
   for(int i=1; i<16; i++){
-    printf(", %x", ciphertexts[16+i]);
+    printf(", %x", ciphertexts[32+i]);
   }
   printf("}\n");     
 }

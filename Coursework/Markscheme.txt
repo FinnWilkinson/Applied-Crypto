@@ -16,7 +16,7 @@
 So that we can calibrate and improve the assignment in the future, give us
 a rough idea how long (in hours) you spent on it *in total*:
 
-effort : [33] hours
+effort : [35] hours
 
 -------------------------------------------------------------------------------
 
@@ -68,6 +68,27 @@ Any other documentation, notes or comments that you think are important or
 might be easy to overlook (e.g., a subtle issue or technique in associated
 source code) should go here:
 
-[...]
+[
+  - upon opening a new terinal, the AppliedCryptoSetUp.sh file was executed in the home directory using the following command 
+    in order to set up the environment for execution on the SCALE board emulator:
+		source AppliedCryptoSetUp.sh
+
+  - target.c was built using the following command:
+		make build-target
+  - target was then executed on the SCALE emulator using the following command:
+		make emulate-target
+	
+  - interaction with target emulation is performed using the following terminal command:
+		make putty-emulator
+
+  - attack.c was built using the following compile command in the terminal:
+		gcc -std=c99 -Wall -Ofast attack.c -o attack
+
+  - attack is then executed (to perform attack on provided trace data trace.dat) using the following command in terinal:
+		./attack traces.dat
+
+  - Stage 3 : security evaluation and reasoning about how it could work can be found in SecurityEvaluation.txt
+
+]
 
 -------------------------------------------------------------------------------
