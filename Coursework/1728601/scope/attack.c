@@ -41,9 +41,9 @@ void attack( int argc, char* argv[] )
   start = clock();
 
   //Load in data
-  printf("Loading in Data ...\n");
+  printf("\nLoading in Data ...\n");
   traces_ld(argv[argc-1], &number_traces, &number_samples, &plaintexts, &ciphertexts, &samples);
-  printf("... Finished Loading\n\n");
+  printf("Finished Loading\n\n");
 
   //set up needed constant values
   uint8_t hamming_Weights[256], key_values[256];
@@ -60,14 +60,12 @@ void attack( int argc, char* argv[] )
   for(int i=0; i<16; i++){
     printf("Making Guess for Key Byte %d ...\n", i+1);
 
-    printf("Calculating Hypothetical Power Usage ...\n");
     for(int y=0; y<number_traces; y++){
       for(int x=0; x<256; x++){
         values[(x*number_traces) + y] = hamming_Weights[sbox(plaintexts[(y*16) + i] ^ key_values[x])];
       }
     }
 
-    printf("Calculating Correlation With Aquired Traces ...\n");
     float max_Correlation_Val = -1.0f;
     float min_Correlation_Val = 1.0f;
     int min_correlation_index = -1;
@@ -90,13 +88,11 @@ void attack( int argc, char* argv[] )
     //value with biggest correlation value's row = key value guess
     if(max_Correlation_Val > -min_Correlation_Val) final_key_guess[i] = max_correlation_index;
     else if(min_Correlation_Val < -max_Correlation_Val) final_key_guess[i] = min_correlation_index;
-
-    printf("Guess Made for Key Byte %d\n\n", i+1);
   }
 
   end = clock();
   cpu_time_used = ((double) (end-start)) / CLOCKS_PER_SEC;
-  printf("Time Elapsed : %f Seconds\n", cpu_time_used);
+  printf("\nTime Elapsed : %f Seconds\n", cpu_time_used);
 
   printf("Secret Key Guess : {%x", final_key_guess[0]);
   for(int i=1; i<16; i++){
@@ -122,7 +118,7 @@ void check_key(uint8_t* plaintexts, uint8_t* ciphertexts, uint8_t* key)
     //check output
     for(int j=0; j<16; j++){
       if(output[j] != ciphertext_hold[j]){
-        printf("Wrong Key. Failed at : %d\n", i);
+        printf("Wrong Key. Failed on Trace : %d\n", i);
         exit(0);
       }
     }

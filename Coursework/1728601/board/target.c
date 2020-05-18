@@ -20,30 +20,30 @@
   s[d] = sbox(s[d]);                    \
 }
 #define AES_ENC_RND_ROW_STEP(a,b,c,d,e,f,g,h) { \
-  uint8_t a1 = s[a];                         \
-  uint8_t b1 = s[b];                         \
-  uint8_t c1 = s[c];                         \
-  uint8_t d1 = s[d];                         \
+  uint8_t a1 = s[a];                            \
+  uint8_t b1 = s[b];                            \
+  uint8_t c1 = s[c];                            \
+  uint8_t d1 = s[d];                            \
   s[e] = a1;                                    \
   s[f] = b1;                                    \
   s[g] = c1;                                    \
   s[h] = d1;                                    \
 }
 #define AES_ENC_RND_MIX_STEP(a,b,c,d) { \
-  uint8_t a1 = s[a];                 \
-  uint8_t b1 = s[b];                 \
-  uint8_t c1 = s[c];                 \
-  uint8_t d1 = s[d];                 \
+  uint8_t a1 = s[a];                    \
+  uint8_t b1 = s[b];                    \
+  uint8_t c1 = s[c];                    \
+  uint8_t d1 = s[d];                    \
                                         \
-  uint8_t a2 = xtime(a1);            \
-  uint8_t b2 = xtime(b1);            \
-  uint8_t c2 = xtime(c1);            \
-  uint8_t d2 = xtime(d1);            \
+  uint8_t a2 = xtime(a1);               \
+  uint8_t b2 = xtime(b1);               \
+  uint8_t c2 = xtime(c1);               \
+  uint8_t d2 = xtime(d1);               \
                                         \
-  uint8_t a3 = a1^a2;                \
-  uint8_t b3 = b1^b2;                \
-  uint8_t c3 = c1^c2;                \
-  uint8_t d3 = d1^d2;                \
+  uint8_t a3 = a1^a2;                   \
+  uint8_t b3 = b1^b2;                   \
+  uint8_t c3 = c1^c2;                   \
+  uint8_t d3 = d1^d2;                   \
                                         \
   s[a] = a2^b3^c1^d1;                   \
   s[b] = a1^b2^c3^d1;                   \
@@ -259,8 +259,7 @@ void aes_enc_rnd_mix(uint8_t* s) {
   * \param[in]  r   some         randomness
   */
 void aes_init(                               const uint8_t* k, const uint8_t* r ) {
-  //precompute round keys
-  //not used atm
+  
   return;
 }
 
