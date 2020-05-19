@@ -57,7 +57,7 @@ uint8_t aes_gf28_mul( uint8_t a, uint8_t b);
 uint8_t aes_gf28_inv( uint8_t a);
 void aes_enc_exp_step( uint8_t* rk, uint8_t rc);
 void aes_enc_rnd_key(uint8_t* s, uint8_t* rk);
-void aes_enc_rnd_sub(uint8_t* s);
+void aes_enc_rnd_sub(uint8_t* s, uint8_t* r);
 void aes_enc_rnd_row(uint8_t* s);
 void aes_enc_rnd_mix(uint8_t* s);
 void aes_enc(uint8_t* c, uint8_t* m, uint8_t* k);
@@ -226,12 +226,34 @@ void aes_enc_rnd_key(uint8_t* s, uint8_t* rk) {
   AES_ENC_RND_KEY_STEP(12,13,14,15); //col4
 }
 
-void aes_enc_rnd_sub(uint8_t* s) {
-  //Sub-Bytes function using macro
-  AES_ENC_RND_SUB_STEP(0,1,2,3);
+void aes_enc_rnd_sub(uint8_t* s, uint8_t* r) {
+  //Sub-Bytes function using macro, but with random shuffling implemented
+  srand(scale_tsc());
+  srand(scale_tsc() * r[rand()%SIZEOF_RND]);
+  //GENERATE RANDOM SEQUENCE OF EXECUTION ORDER
+  int i=0;
+  int x=0;
+  uint8_t sequence[16];
+  while(i<16){
+    int q = rand()%16;
+    for(x=0; x<i; x++){
+      if(sequence[x]==q){
+        break;
+      }
+    }
+    if(x==i){
+      sequence[i++] = q;
+    }
+  }
+
+  AES_ENC_RND_SUB_STEP(sequence[0],sequence[1],sequence[2],sequence[3]);
+  AES_ENC_RND_SUB_STEP(sequence[4],sequence[5],sequence[6],sequence[7]);
+  AES_ENC_RND_SUB_STEP(sequence[8],sequence[9],sequence[10],sequence[11]);
+  AES_ENC_RND_SUB_STEP(sequence[12],sequence[13],sequence[14],sequence[15]);
+  /*AES_ENC_RND_SUB_STEP(0,1,2,3);
   AES_ENC_RND_SUB_STEP(4,5,6,7);
   AES_ENC_RND_SUB_STEP(8,9,10,11);
-  AES_ENC_RND_SUB_STEP(12,13,14,15);
+  AES_ENC_RND_SUB_STEP(12,13,14,15);*/
 }
 
 void aes_enc_rnd_row(uint8_t* s) {
@@ -272,9 +294,13 @@ void aes_init(                               const uint8_t* k, const uint8_t* r 
   * \param[in]  r   some         randomness
   */
 
-void aes     ( uint8_t* c, const uint8_t* m, const uint8_t* k, const uint8_t* r ) {
-  memcpy(c, m, SIZEOF_BLK*sizeof(uint8_t));
+void aes     ( uint8_t* c, const uint8_t* m, const uint8_t* k, uint8_t* r ) {
+  //Main AES function with dummy operations added in 
+  srand(scale_tsc());
+  srand(scale_tsc() * r[rand()%SIZEOF_RND]); //seed rand() function
+  uint8_t number_dummy_ops = 0;
 
+  memcpy(c, m, SIZEOF_BLK*sizeof(uint8_t));
   uint8_t key[SIZEOF_KEY];
   memcpy(key, k, SIZEOF_KEY*sizeof(uint8_t));
   uint8_t rc[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
@@ -282,14 +308,64 @@ void aes     ( uint8_t* c, const uint8_t* m, const uint8_t* k, const uint8_t* r 
   aes_enc_rnd_key(c, key);
   //Nr-1 iterated rounds with Nr = 10 for AES-128
   for (int i = 1; i < 10; i++) {
-    aes_enc_rnd_sub(c);
-    aes_enc_rnd_row(c);
-    aes_enc_rnd_mix(c);
+    for(int j=0; j<(rand()%(DUMMY_OPS/4)); j++ ){
+      if(number_dummy_ops < DUMMY_OPS){
+        aes_enc_rnd_sub(r, r);
+        srand(scale_tsc() * r[rand()%SIZEOF_RND]);
+        number_dummy_ops++;
+      }      
+    }
+
+    aes_enc_rnd_sub(c, r);                                //real Sub-bytes
+
+    for(int j=0; j<(rand()%(DUMMY_OPS/4)); j++ ){
+      if(number_dummy_ops < DUMMY_OPS){
+        aes_enc_rnd_mix(r);
+        srand(scale_tsc() * r[rand()%SIZEOF_RND]);
+        number_dummy_ops++;
+      }      
+    }
+    for(int j=0; j<(rand()%(DUMMY_OPS/4)); j++ ){
+      if(number_dummy_ops < DUMMY_OPS){
+        aes_enc_rnd_row(r);
+        srand(scale_tsc() * r[rand()%SIZEOF_RND]);
+        number_dummy_ops++;
+      }      
+    }
+
+    aes_enc_rnd_row(c);                                   //real shift-rows
+
+    for(int j=0; j<(rand()%(DUMMY_OPS/4)); j++ ){
+      if(number_dummy_ops < DUMMY_OPS){
+        aes_enc_rnd_mix(r);
+        number_dummy_ops++;
+      }      
+    }
+
+    aes_enc_rnd_mix(c);                                    //real mix-columns
+
+    for(int j=0; j<(rand()%(DUMMY_OPS/4)); j++ ){
+      if(number_dummy_ops < DUMMY_OPS){
+        aes_enc_rnd_key(r, r);
+        srand(scale_tsc() * r[rand()%SIZEOF_RND]);
+        number_dummy_ops++;
+      }      
+    }
+
     aes_enc_exp_step(key, rc[i-1]);
     aes_enc_rnd_key(c, key);
   }
   //1 final round
-  aes_enc_rnd_sub(c);
+  aes_enc_rnd_sub(c, r);
+
+  for(int j=0; j<DUMMY_OPS - number_dummy_ops; j++ ){
+    if(number_dummy_ops < DUMMY_OPS){
+      aes_enc_rnd_sub(r, r);
+      srand(scale_tsc() * r[rand()%SIZEOF_RND]);
+      number_dummy_ops++;
+    }      
+  }
+
   aes_enc_rnd_row(c);
   aes_enc_exp_step(key, rc[9]);
   aes_enc_rnd_key(c, key);

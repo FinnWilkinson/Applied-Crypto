@@ -1,0 +1,11 @@
+
+
+ - Randomly inserts exactly 48 dummy operations during each of the main 9 AES loops and in the final loop.
+ - dummy operations consist of extra SubByte, ShiftRow, AddRoundKey, and MixColumn function calls
+ - uses scale_tsc() multiplied with a random byte of the input randomness in order to seed the random numbers generated
+ - random number generator seeded after each dummy operation
+
+ - in the function aes_enc_rnd_sub (subBytes step), the order that sbox is applied is determined randomly by first seeding the srand once again, and then
+   using rand() to generate the order that sbox is called upon each byte of the current state
+
+ - combining shuffling on the sbox calculations, and adding in dummy operations imporves the security at little additional compuational and space costs.

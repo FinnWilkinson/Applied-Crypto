@@ -13,12 +13,15 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include   <time.h>
 
 #define COMMAND_INSPECT ( 0x00 )
 #define COMMAND_ENCRYPT ( 0x01 )
 
+#define DUMMY_OPS       (   48 )
+
 #define SIZEOF_BLK      (   16 )
 #define SIZEOF_KEY      (   16 )
-#define SIZEOF_RND      (    0 )
+#define SIZEOF_RND      (   16 )
 
 #endif
