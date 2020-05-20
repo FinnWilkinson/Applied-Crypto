@@ -16,7 +16,7 @@
 So that we can calibrate and improve the assignment in the future, give us
 a rough idea how long (in hours) you spent on it *in total*:
 
-effort : [35] hours
+effort : [55] hours
 
 -------------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ are not (necessarily) detailed explicitly.
     Stage 2 : an attack         implementation
 [X]           - an   assisted (or   dependent) solution              ( 30%)
                 *OR*
-[?]           - an unassisted (or independent) solution              ( 40%)
+[X]           - an unassisted (or independent) solution              ( 40%)
 
     Stage 3 : a  countermeasure implementation
               - selection and implementation                         ( 15%)
@@ -72,16 +72,17 @@ might be easy to overlook (e.g., a subtle issue or technique in associated
 source code) should go here:
 
 [
-  - upon opening a new terinal, the AppliedCryptoSetUp.sh file was executed in the home directory using the following command 
+  - Upon opening a new terinal, the AppliedCryptoSetUp.sh file was executed in the home directory using the following command 
     in order to set up the environment for execution on the SCALE board emulator:
 		source AppliedCryptoSetUp.sh
 
   - target.c was built using the following command:
 		make build-target
+
   - target was then executed on the SCALE emulator using the following command:
 		make emulate-target
 	
-  - interaction with target emulation is performed using the following terminal command:
+  - Interaction with target emulation is performed using the following terminal command:
 		make putty-emulator
 
   - attack.c was built using the following compile command in the terminal:
@@ -89,6 +90,10 @@ source code) should go here:
 
   - attack is then executed (to perform attack on provided trace data trace.dat) using the following command in terinal:
 		./attack traces.dat
+
+  - In attack.c, traces and hypothetical power values are stored in a 1 dimentional array in column major. This decision was made
+    so that accessing the needed values could be done in a more sequential manner at run time, therefore reducing execution time. 
+    Ultimately this means that each row of the two matricies are compared rather than each column as specified in the lecture materials.
 
   - Stage 3 : security evaluation and reasoning about how it could work can be found in SecurityEvaluation.txt
 

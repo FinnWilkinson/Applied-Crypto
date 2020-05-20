@@ -246,10 +246,10 @@ void aes_enc_rnd_sub(uint8_t* s, uint8_t* r) {
     }
   }
 
-  AES_ENC_RND_SUB_STEP(sequence[0],sequence[1],sequence[2],sequence[3]);
-  AES_ENC_RND_SUB_STEP(sequence[4],sequence[5],sequence[6],sequence[7]);
-  AES_ENC_RND_SUB_STEP(sequence[8],sequence[9],sequence[10],sequence[11]);
-  AES_ENC_RND_SUB_STEP(sequence[12],sequence[13],sequence[14],sequence[15]);
+  AES_ENC_RND_SUB_STEP(sequence[0],sequence[9],sequence[5],sequence[13]);
+  AES_ENC_RND_SUB_STEP(sequence[2],sequence[10],sequence[6],sequence[14]);
+  AES_ENC_RND_SUB_STEP(sequence[3],sequence[11],sequence[7],sequence[1]);
+  AES_ENC_RND_SUB_STEP(sequence[4],sequence[12],sequence[8],sequence[15]);
   /*AES_ENC_RND_SUB_STEP(0,1,2,3);
   AES_ENC_RND_SUB_STEP(4,5,6,7);
   AES_ENC_RND_SUB_STEP(8,9,10,11);
@@ -415,7 +415,7 @@ int main( int argc, char* argv[] ) {
     return -1;
   }
 
-  uint8_t cmd[ 1 ], c[ SIZEOF_BLK ], m[ SIZEOF_BLK ], k[ SIZEOF_KEY ] = {0xD3, 0x85, 0x33, 0x46, 0x02, 0x8B, 0x6E, 0x24, 0x86, 0x62, 0xE9, 0x95, 0xAB, 0x68, 0x7E, 0x25}/*{ 0xFC, 0x00, 0x24, 0xE2, 0x7B, 0x3A, 0x1A, 0x9A, 0x9D, 0xC5, 0xFC, 0xFF, 0xA1, 0x0A, 0x3F, 0xE7 }*/, r[ SIZEOF_RND ];
+  uint8_t cmd[ 1 ], c[ SIZEOF_BLK ], m[ SIZEOF_BLK ], k[ SIZEOF_KEY ] = { 0xFC, 0x00, 0x24, 0xE2, 0x7B, 0x3A, 0x1A, 0x9A, 0x9D, 0xC5, 0xFC, 0xFF, 0xA1, 0x0A, 0x3F, 0xE7 }, r[ SIZEOF_RND ];
 
   while( true ) {
     if( 1 != octetstr_rd( cmd, 1 ) ) {
