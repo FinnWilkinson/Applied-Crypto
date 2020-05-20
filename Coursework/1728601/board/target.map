@@ -1,7 +1,7 @@
 Archive member included to satisfy reference by file (symbol)
 
 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(scale.o)
-                              /tmp/cclE63ZQ.o (scale_init)
+                              /tmp/ccObqMV4.o (scale_init)
 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(bsp.o)
                               /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(scale.o) (scale_conf)
 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(lpc13xx.o)
@@ -9,7 +9,7 @@ Archive member included to satisfy reference by file (symbol)
 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(crt0.o)
                               (__irq_vector)
 /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-rand.o)
-                              /tmp/cclE63ZQ.o (srand)
+                              /tmp/ccObqMV4.o (srand)
 /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-impure.o)
                               /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-rand.o) (_impure_ptr)
 
@@ -27,7 +27,7 @@ ram              0x0000000010000000 0x0000000000002000 xrw
 
 Linker script and memory map
 
-LOAD /tmp/cclE63ZQ.o
+LOAD /tmp/ccObqMV4.o
 LOAD /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a
 START GROUP
 LOAD /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m/libgcc.a
@@ -35,7 +35,7 @@ LOAD /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/.
 END GROUP
                 0x0000000000000000                . = 0x0
 
-.text           0x0000000000000000      0xee8
+.text           0x0000000000000000      0xf2c
                 0x0000000000000000                __head_text = .
  *(.data.__irq_handler)
  .data.__irq_handler
@@ -47,7 +47,7 @@ END GROUP
                 0x0000000000000040                __irq_handler_nul
                 0x0000000000000042                __irq_handler_rst
  *(.text*)
- .text          0x0000000000000088      0x854 /tmp/cclE63ZQ.o
+ .text          0x0000000000000088      0x898 /tmp/ccObqMV4.o
                 0x0000000000000088                hex2int
                 0x00000000000000b0                octetstr_rd
                 0x0000000000000132                int2hex
@@ -63,70 +63,70 @@ END GROUP
                 0x0000000000000506                aes_enc_rnd_mix
                 0x0000000000000668                aes_init
                 0x000000000000066a                aes
- .text.startup  0x00000000000008dc       0xbc /tmp/cclE63ZQ.o
-                0x00000000000008dc                main
- .text          0x0000000000000998      0x4cc /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(scale.o)
-                0x0000000000000998                scale_init
-                0x0000000000000c3c                scale_delay_us
-                0x0000000000000c58                scale_delay_ms
-                0x0000000000000c70                scale_tsc
-                0x0000000000000c80                scale_gpio_rd
-                0x0000000000000cbc                scale_gpio_wr
-                0x0000000000000d0c                scale_uart_rd_avail
-                0x0000000000000d1c                scale_uart_wr_avail
-                0x0000000000000d2c                scale_uart_rd
-                0x0000000000000d44                scale_uart_wr
-                0x0000000000000d5c                scale_i2c_fsm
-                0x0000000000000e50                scale_i2c_rd
-                0x0000000000000e5a                scale_i2c_wr
- .text          0x0000000000000e64        0x0 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(bsp.o)
- .text          0x0000000000000e64        0x0 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(lpc13xx.o)
- .text.lpc13xx  0x0000000000000e64        0x8 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(lpc13xx.o)
-                0x0000000000000e64                lpc13xx_irq_enable
-                0x0000000000000e68                lpc13xx_irq_unable
- .text          0x0000000000000e6c        0x0 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(crt0.o)
- .text.__start  0x0000000000000e6c        0xa /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(crt0.o)
-                0x0000000000000e6c                __start
- .text          0x0000000000000e76        0x0 /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-rand.o)
- *fill*         0x0000000000000e76        0x2 
- .text.srand    0x0000000000000e78       0x10 /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-rand.o)
-                0x0000000000000e78                srand
- .text.rand     0x0000000000000e88       0x3c /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-rand.o)
-                0x0000000000000e88                rand
- .text          0x0000000000000ec4        0x0 /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-impure.o)
+ .text.startup  0x0000000000000920       0xbc /tmp/ccObqMV4.o
+                0x0000000000000920                main
+ .text          0x00000000000009dc      0x4cc /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(scale.o)
+                0x00000000000009dc                scale_init
+                0x0000000000000c80                scale_delay_us
+                0x0000000000000c9c                scale_delay_ms
+                0x0000000000000cb4                scale_tsc
+                0x0000000000000cc4                scale_gpio_rd
+                0x0000000000000d00                scale_gpio_wr
+                0x0000000000000d50                scale_uart_rd_avail
+                0x0000000000000d60                scale_uart_wr_avail
+                0x0000000000000d70                scale_uart_rd
+                0x0000000000000d88                scale_uart_wr
+                0x0000000000000da0                scale_i2c_fsm
+                0x0000000000000e94                scale_i2c_rd
+                0x0000000000000e9e                scale_i2c_wr
+ .text          0x0000000000000ea8        0x0 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(bsp.o)
+ .text          0x0000000000000ea8        0x0 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(lpc13xx.o)
+ .text.lpc13xx  0x0000000000000ea8        0x8 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(lpc13xx.o)
+                0x0000000000000ea8                lpc13xx_irq_enable
+                0x0000000000000eac                lpc13xx_irq_unable
+ .text          0x0000000000000eb0        0x0 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(crt0.o)
+ .text.__start  0x0000000000000eb0        0xa /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(crt0.o)
+                0x0000000000000eb0                __start
+ .text          0x0000000000000eba        0x0 /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-rand.o)
+ *fill*         0x0000000000000eba        0x2 
+ .text.srand    0x0000000000000ebc       0x10 /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-rand.o)
+                0x0000000000000ebc                srand
+ .text.rand     0x0000000000000ecc       0x3c /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-rand.o)
+                0x0000000000000ecc                rand
+ .text          0x0000000000000f08        0x0 /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-impure.o)
  *(.text.*)
  *(.rodata*)
- .rodata        0x0000000000000ec4       0x1e /tmp/cclE63ZQ.o
- *fill*         0x0000000000000ee2        0x2 
+ .rodata        0x0000000000000f08       0x1e /tmp/ccObqMV4.o
+ *fill*         0x0000000000000f26        0x2 
  .rodata._global_impure_ptr
-                0x0000000000000ee4        0x4 /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-impure.o)
-                0x0000000000000ee4                _global_impure_ptr
+                0x0000000000000f28        0x4 /opt/gcc-arm-none-eabi/7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/libc.a(lib_a-impure.o)
+                0x0000000000000f28                _global_impure_ptr
  *(.rodata.*)
-                0x0000000000000ee8                . = ALIGN (0x4)
-                0x0000000000000ee8                __foot_text = .
+                0x0000000000000f2c                . = ALIGN (0x4)
+                0x0000000000000f2c                __foot_text = .
 
-.glue_7         0x0000000000000ee8        0x0
- .glue_7        0x0000000000000ee8        0x0 linker stubs
+.glue_7         0x0000000000000f2c        0x0
+ .glue_7        0x0000000000000f2c        0x0 linker stubs
 
-.glue_7t        0x0000000000000ee8        0x0
- .glue_7t       0x0000000000000ee8        0x0 linker stubs
+.glue_7t        0x0000000000000f2c        0x0
+ .glue_7t       0x0000000000000f2c        0x0 linker stubs
 
-.vfp11_veneer   0x0000000000000ee8        0x0
- .vfp11_veneer  0x0000000000000ee8        0x0 linker stubs
+.vfp11_veneer   0x0000000000000f2c        0x0
+ .vfp11_veneer  0x0000000000000f2c        0x0 linker stubs
 
-.v4_bx          0x0000000000000ee8        0x0
- .v4_bx         0x0000000000000ee8        0x0 linker stubs
+.v4_bx          0x0000000000000f2c        0x0
+ .v4_bx         0x0000000000000f2c        0x0 linker stubs
 
-.iplt           0x0000000000000ee8        0x0
- .iplt          0x0000000000000ee8        0x0 /tmp/cclE63ZQ.o
+.iplt           0x0000000000000f2c        0x0
+ .iplt          0x0000000000000f2c        0x0 /tmp/ccObqMV4.o
 
-.rel.dyn        0x0000000000000ee8        0x0
- .rel.iplt      0x0000000000000ee8        0x0 /tmp/cclE63ZQ.o
+.rel.dyn        0x0000000000000f2c        0x0
+ .rel.iplt      0x0000000000000f2c        0x0 /tmp/ccObqMV4.o
 
-.data           0x0000000010000000      0x458 load address 0x0000000000000ef0
+.data           0x0000000010000000      0x458 load address 0x0000000000000f30
                 0x0000000010000000                __head_data = .
  *(.data)
- .data          0x0000000010000000        0x0 /tmp/cclE63ZQ.o
+ .data          0x0000000010000000        0x0 /tmp/ccObqMV4.o
  .data          0x0000000010000000        0x4 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(scale.o)
                 0x0000000010000000                SCALE_CONF
  .data          0x0000000010000004        0x0 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(bsp.o)
@@ -154,13 +154,13 @@ END GROUP
                 0x0000000010000458                . = ALIGN (0x4)
                 0x0000000010000458                __foot_data = .
 
-.igot.plt       0x0000000010000458        0x0 load address 0x0000000000001348
- .igot.plt      0x0000000010000458        0x0 /tmp/cclE63ZQ.o
+.igot.plt       0x0000000010000458        0x0 load address 0x0000000000001388
+ .igot.plt      0x0000000010000458        0x0 /tmp/ccObqMV4.o
 
-.bss            0x0000000010000460        0x4 load address 0x0000000000001350
+.bss            0x0000000010000460        0x4 load address 0x0000000000001390
                 0x0000000010000460                __head_bss = .
  *(.bss)
- .bss           0x0000000010000460        0x0 /tmp/cclE63ZQ.o
+ .bss           0x0000000010000460        0x0 /tmp/ccObqMV4.o
  .bss           0x0000000010000460        0x0 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(scale.o)
  .bss           0x0000000010000460        0x0 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(bsp.o)
  .bss           0x0000000010000460        0x0 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(lpc13xx.o)
@@ -173,13 +173,13 @@ END GROUP
  COMMON         0x0000000010000460        0x4 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(bsp.o)
                 0x0000000010000460                scale_conf
                 [!provide]                        PROVIDE (__load_text, LOADADDR (.text))
-                0x0000000000000ef0                PROVIDE (__load_data, LOADADDR (.data))
-                0x0000000000001350                PROVIDE (__load_bss, LOADADDR (.bss))
+                0x0000000000000f30                PROVIDE (__load_data, LOADADDR (.data))
+                0x0000000000001390                PROVIDE (__load_bss, LOADADDR (.bss))
                 0x0000000010002000                PROVIDE (__tos, (ORIGIN (ram) + LENGTH (ram)))
 OUTPUT(target.elf elf32-littlearm)
 
 .comment        0x0000000000000000       0x7e
- .comment       0x0000000000000000       0x7e /tmp/cclE63ZQ.o
+ .comment       0x0000000000000000       0x7e /tmp/ccObqMV4.o
                                          0x7f (size before relaxing)
  .comment       0x000000000000007e       0x7f /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(scale.o)
  .comment       0x000000000000007e       0x7f /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(bsp.o)
@@ -187,7 +187,7 @@ OUTPUT(target.elf elf32-littlearm)
 .ARM.attributes
                 0x0000000000000000       0x31
  .ARM.attributes
-                0x0000000000000000       0x33 /tmp/cclE63ZQ.o
+                0x0000000000000000       0x33 /tmp/ccObqMV4.o
  .ARM.attributes
                 0x0000000000000033       0x33 /home/fw17231/scale-hw/target/lpc1313fbd48/build/lib/libscale.a(scale.o)
  .ARM.attributes

@@ -1,11 +1,27 @@
+In an attempt to secure my AES-128 implementation, I have added in dummy operations and shuffling counter measures in order to greatly reduce the success, and therefore prevention, of the DPA attack implementation created. The countermeasure implemented will carry out the same number of dummy operations every execution, so that an attacker cannot get any information about the number of dummy operations used[1].
+
+At the start of each call of the AES function, srand() is called and seeded with scale_tsc() - the SCALE board cycle counter -, and then srand() is called again seeded with scale_tsc() multiplied with a random digit from the user input randomness. This is done in an attempt to properly seed the random number generator with a as random as possible seed.
+
+Once The main loop of the AES function is entered, at various stages there are chances for a random number (below the total dummy operation count) of dummy operations to be executed. The following operations are called, with the user input randomness being the input of these functions:
+	- Sub-Byte
+	- Shift-Row
+	- Add-RoundKey
+	- Mix-Column
+The order in which these can be called are fixed, and closly relate to where the 'real' versions of these functions will be called. However the number of times each dummy operation is called will vary from execution to execution and loop to loop.
+Additionally in an attempt to make the process as random as possible, srand() is called after every dummy operation has been performed in order to re-seed the random number generator.
+
+For both dummy and real calls of the Sub-Bytes function, shuffling is carried out by generating a random sequence for every Sub-Bytes call. In theory this should randomise the power consumption in a similar way to the dummy operation insertion[1]. 
+
+The combined use of both shuffling and dummy operations should randomise the power consumption of my AES algorithm in order to prevent the DPA attack that I have implemented. However, there are obvious overheads regarding both algorithm latency and area.
+In regards to area overheads, this is fairly limited, with only two extra arrays being used: one for the user input randomness, another for the random Sub-Byte sequence. Each of these arrays has a size of 16 bytes and so keeps the area overheads low.
+For algorithm latency, there is a considerable amount of excess processing time being used as a result of a) all the dummy operation calls, totaling 48 for every AES execution, b)the seeding and calling of the random number function, as well as c) the generation of the random Sub-Bytes execution sequence.
+
+Implementing these counter measures relies on the adversary not changin their (or in this case our own) attack implementation. For example, one way to try and combat shuffling would be for the adversary to integrate the power data they collected before analysing it in order to try and imporve the correlation estimates[1].
+
+We also assume that the counter measures implemented will drastically increase how random collected trace data will look, and that an adversary will have trouble distinguishing the correct key value from a number of similar correlation values.
+From table 2 in section 7.3[2], we can see that with a lower true correlation value between the key and power consumption, more traces are needed in order to estimate the secret key correctly. Therefore, by increasing the randomness of the output trace values, this subsiquently reduces the maximum correlation values that can occur. This therefore can drastically increase the number of traces that an adversary will need to collect to perform a successful attack. Not only will more traces take an adversary more time to collect, but they will also run into resource issues.
 
 
- - Randomly inserts exactly 48 dummy operations during each of the main 9 AES loops and in the final loop.
- - dummy operations consist of extra SubByte, ShiftRow, AddRoundKey, and MixColumn function calls
- - uses scale_tsc() multiplied with a random byte of the input randomness in order to seed the random numbers generated
- - random number generator seeded after each dummy operation
 
- - in the function aes_enc_rnd_sub (subBytes step), the order that sbox is applied is determined randomly by first seeding the srand once again, and then
-   using rand() to generate the order that sbox is called upon each byte of the current state
-
- - combining shuffling on the sbox calculations, and adding in dummy operations imporves the security at little additional compuational and space costs.
+ - [1]Week 19 Handout 3: Countermeasures: AES, Elisabeth Oswald
+ - [2]Week 19 Handout 2: Differential Attacks: DPA on AES, Elisabeth Oswald

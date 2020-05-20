@@ -308,7 +308,7 @@ void aes     ( uint8_t* c, const uint8_t* m, const uint8_t* k, uint8_t* r ) {
   aes_enc_rnd_key(c, key);
   //Nr-1 iterated rounds with Nr = 10 for AES-128
   for (int i = 1; i < 10; i++) {
-    for(int j=0; j<(rand()%(DUMMY_OPS/4)); j++ ){
+    for(int j=0; j<(rand()%4); j++ ){
       if(number_dummy_ops < DUMMY_OPS){
         aes_enc_rnd_sub(r, r);
         srand(scale_tsc() * r[rand()%SIZEOF_RND]);
@@ -318,14 +318,14 @@ void aes     ( uint8_t* c, const uint8_t* m, const uint8_t* k, uint8_t* r ) {
 
     aes_enc_rnd_sub(c, r);                                //real Sub-bytes
 
-    for(int j=0; j<(rand()%(DUMMY_OPS/4)); j++ ){
+    for(int j=0; j<(rand()%4); j++ ){
       if(number_dummy_ops < DUMMY_OPS){
         aes_enc_rnd_mix(r);
         srand(scale_tsc() * r[rand()%SIZEOF_RND]);
         number_dummy_ops++;
       }      
     }
-    for(int j=0; j<(rand()%(DUMMY_OPS/4)); j++ ){
+    for(int j=0; j<(rand()%4); j++ ){
       if(number_dummy_ops < DUMMY_OPS){
         aes_enc_rnd_row(r);
         srand(scale_tsc() * r[rand()%SIZEOF_RND]);
@@ -335,16 +335,17 @@ void aes     ( uint8_t* c, const uint8_t* m, const uint8_t* k, uint8_t* r ) {
 
     aes_enc_rnd_row(c);                                   //real shift-rows
 
-    for(int j=0; j<(rand()%(DUMMY_OPS/4)); j++ ){
+    for(int j=0; j<(rand()%4); j++ ){
       if(number_dummy_ops < DUMMY_OPS){
         aes_enc_rnd_mix(r);
+        srand(scale_tsc() * r[rand()%SIZEOF_RND]);
         number_dummy_ops++;
       }      
     }
 
     aes_enc_rnd_mix(c);                                    //real mix-columns
 
-    for(int j=0; j<(rand()%(DUMMY_OPS/4)); j++ ){
+    for(int j=0; j<(rand()%4); j++ ){
       if(number_dummy_ops < DUMMY_OPS){
         aes_enc_rnd_key(r, r);
         srand(scale_tsc() * r[rand()%SIZEOF_RND]);
