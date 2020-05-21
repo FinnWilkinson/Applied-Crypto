@@ -1,27 +1,38 @@
-In an attempt to secure my AES-128 implementation, I have added in dummy operations and shuffling counter measures in order to greatly reduce the success, and therefore prevention, of the DPA attack implementation created. The countermeasure implemented will carry out the same number of dummy operations every execution, so that an attacker cannot get any information about the number of dummy operations used[1].
+In an attempt to secure my AES-128 implementation, I have added in dummy operations and shuffling counter measures in order to greatly reduce the success, and hopefully prevent, the DPA attack implementation created. The countermeasures implemented will carry out the same number of dummy operations every execution, so that an attacker cannot get any information about the number of dummy operations used[1].
 
-At the start of each call of the AES function, srand() is called and seeded with scale_tsc() - the SCALE board cycle counter -, and then srand() is called again seeded with scale_tsc() multiplied with a random digit from the user input randomness. This is done in an attempt to properly seed the random number generator with a as random as possible seed.
+At the start of each call of the AES function, srand() is called and seeded with scale_tsc() (the SCALE board cycle counter), and then srand() is called again seeded with scale_tsc() multiplied with a random digit from the user input randomness. This is done in an attempt to properly seed the random number generator with an as random as possible seed.
 
-Once The main loop of the AES function is entered, at various stages there are chances for a random number (below the total dummy operation count) of dummy operations to be executed. The following operations are called, with the user input randomness being the input of these functions:
+Once the main loop of the AES function is entered, at various stages there are chances for a random number (below the total dummy operation count) of dummy operations to be executed. The following operations are called, with the user input randomness being the input of these functions:
 	- Sub-Byte
 	- Shift-Row
 	- Add-RoundKey
 	- Mix-Column
-The order in which these can be called are fixed, and closly relate to where the 'real' versions of these functions will be called. However the number of times each dummy operation is called will vary from execution to execution and loop to loop.
+The order in which these can be called are fixed, and closly relate to where the 'real' versions of these functions will be called in the AES implementation. However, the number of times each dummy operation is called will vary from execution to execution and from loop to loop.
 Additionally in an attempt to make the process as random as possible, srand() is called after every dummy operation has been performed in order to re-seed the random number generator.
 
-For both dummy and real calls of the Sub-Bytes function, shuffling is carried out by generating a random sequence for every Sub-Bytes call. In theory this should randomise the power consumption in a similar way to the dummy operation insertion[1]. 
+The total number of dummy instructions inserted each time our AES algorithm is executed is 48 as it provides a good balance between efficiency and effectiveness. As we increase the number of inserted instructions, the number of traces that an adversary would need to collect in order to retrieve the secret key grows quadratically[3]. From table 8.1 on page 71 [3], we see how with 15 inseted instructions, it is approximated that 40,000 traces will need to be collected. With the number of instructions I am using being over 3 times this, the number of traces an adversary will need in order to reliably retrieve the secret key will be immense. 
+
+For both dummy and real calls of the Sub-Bytes function, shuffling is carried out by generating a random sequence for every Sub-Bytes call using a while loop which generates a random number between 0 and 16 once each until the sequence has been completed. 
+Shuffling means that power traces become mis-aligned, meaning that at any one time up to 16 s-box operations to happen[3]. 
+With both dummy injection and shuffling techniques, we see a quadratic increase in the number of power traces required for a successful side-channel attack. Shuffling alone can increase required traces by up to 256 times, however combining shuffling with dummy operation injection yields results far greater than this[3]. 
+One imporvement to my current implementation would be to add dummy s-box calls for every sub-bytes function. This would increase the amount of s-box opperations that could occur at anyone time[3], subsiquently increasing the security of the AES implementation even further.
 
 The combined use of both shuffling and dummy operations should randomise the power consumption of my AES algorithm in order to prevent the DPA attack that I have implemented. However, there are obvious overheads regarding both algorithm latency and area.
-In regards to area overheads, this is fairly limited, with only two extra arrays being used: one for the user input randomness, another for the random Sub-Byte sequence. Each of these arrays has a size of 16 bytes and so keeps the area overheads low.
-For algorithm latency, there is a considerable amount of excess processing time being used as a result of a) all the dummy operation calls, totaling 48 for every AES execution, b)the seeding and calling of the random number function, as well as c) the generation of the random Sub-Bytes execution sequence.
 
-Implementing these counter measures relies on the adversary not changin their (or in this case our own) attack implementation. For example, one way to try and combat shuffling would be for the adversary to integrate the power data they collected before analysing it in order to try and imporve the correlation estimates[1].
+In regards to area overheads, this is fairly limited, with only two extra arrays being used: one for the user input randomness, another for the random Sub-Byte sequence. Each of these arrays has a size of 16 bytes and so keeps the area overheads of the security measures low.
 
-We also assume that the counter measures implemented will drastically increase how random collected trace data will look, and that an adversary will have trouble distinguishing the correct key value from a number of similar correlation values.
+For algorithmic latency, there is a considerable amount of excess processing time being used as a result of a) all the dummy operation calls, totaling 48 for every AES execution, b)the seeding and calling of the random number function, as well as c) the generation of the random Sub-Bytes execution sequence. Despite this overhead, assuming that my un-secured AES implementation met the efficiency measures of the original assignment briefing of 1ms, executing an additional 48 AES state maipulations (as well as calculating the execution order of the Sub-Bytes function) should roughly double this execution time to 2ms. This too would be within the original assignment briefing's efficiency statement for stage 3 of 100ms. Therefore by using this assumption, the latency overhead should be within reasonable limits.
+
+Implementing these counter measures relies on an adversary not changing their (or in this case our own) attack implementation. For example, one way to try and combat shuffling would be for the adversary to integrate the power data they collected before analysing it in order to try and imporve the correlation estimates[1].
+
+We also assume that the counter measures implemented will drastically increase how random collected trace data will look, and that an adversary will have trouble distinguishing the correct key value from a number of similar correlation values. As we are unable to now measure new trace data, we can only assume that our implementation will perform as desired.
+
 From table 2 in section 7.3[2], we can see that with a lower true correlation value between the key and power consumption, more traces are needed in order to estimate the secret key correctly. Therefore, by increasing the randomness of the output trace values, this subsiquently reduces the maximum correlation values that can occur. This therefore can drastically increase the number of traces that an adversary will need to collect to perform a successful attack. Not only will more traces take an adversary more time to collect, but they will also run into resource issues.
+
+Overall, I believe that the countermeasures implemented provide a good trade-off between security improvements and latency/area overheads. Randomising the measurable trace data will make it significantly more difficult for an adversary to estimate our secret key with confidence, and so the countermeasures implemented should plausibly prevent a DPA style attack.
 
 
 
  - [1]Week 19 Handout 3: Countermeasures: AES, Elisabeth Oswald
  - [2]Week 19 Handout 2: Differential Attacks: DPA on AES, Elisabeth Oswald
+ - [3]Power Analysis Based Side Channel Attack, H.Gamaarachchi, H.Ganegoda, University of Peradeniya, pg:68-73, https://arvix.org/pdf/1801.00932.pdf

@@ -16,7 +16,7 @@
 So that we can calibrate and improve the assignment in the future, give us
 a rough idea how long (in hours) you spent on it *in total*:
 
-effort : [55] hours
+effort : [60] hours
 
 -------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ it's clear what's your work and what isn't:
 
 [
   - OpenSSl/aes.h used in attack.c in order to verify the key guess against the plaintexts and
-    ciphertexts read in from the traces data file after guess has been comleted
+    ciphertexts read in from the traces data file after key guess has been comleted
 ]
 
 -------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ might be easy to overlook (e.g., a subtle issue or technique in associated
 source code) should go here:
 
 [
-  - Upon opening a new terinal, the AppliedCryptoSetUp.sh file was executed in the home directory using the following command 
+  - Upon opening a new terminal, the AppliedCryptoSetUp.sh file was executed in the home directory using the following command 
     in order to set up the environment for execution on the SCALE board emulator:
 		source AppliedCryptoSetUp.sh
 
